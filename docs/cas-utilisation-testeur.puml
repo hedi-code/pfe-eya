@@ -1,0 +1,176 @@
+@startuml Cas d'Utilisation - Testeur
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor LightBlue
+  BorderColor DarkBlue
+  ArrowColor Black
+}
+skinparam package {
+  BackgroundColor LightYellow
+  BorderColor DarkGray
+}
+
+' ==================================================
+' ACTEUR
+' ==================================================
+
+actor "Testeur" as Tester
+
+' ==================================================
+' SYSTÈME
+' ==================================================
+
+rectangle "Système de Gestion de Tests - Testeur" {
+
+  ' ========== Authentification ==========
+  package "Authentification" #LightCyan {
+    usecase "S'authentifier" as UC_Login
+    usecase "Se déconnecter" as UC_Logout
+    usecase "Récupérer le rôle\nutilisateur" as UC_GetRole
+  }
+
+  ' ========== Gestion des Suites de Tests ==========
+  package "Gestion des Suites de Tests" #Lavender {
+    usecase "Créer une suite\nde tests" as UC_CreateSuite
+    usecase "Consulter les\nsuites de tests" as UC_ViewSuites
+    usecase "Sélectionner une\nsuite de tests" as UC_SelectSuite
+    usecase "Modifier une\nsuite de tests" as UC_UpdateSuite
+    usecase "Supprimer une\nsuite de tests" as UC_DeleteSuite
+    usecase "Configurer URL\nSelenium" as UC_ConfigSelenium
+    usecase "Ajouter une\ndescription" as UC_AddDescription
+  }
+
+  ' ========== Gestion des Exécutions ==========
+  package "Gestion des Exécutions de Tests" #LightSalmon {
+    usecase "Créer une\nexécution de test" as UC_CreateExecution
+    usecase "Consulter les\nexécutions" as UC_ViewExecutions
+    usecase "Filtrer par\nsuite de tests" as UC_FilterBySuite
+    usecase "Supprimer une\nexécution" as UC_DeleteExecution
+    usecase "Consulter les\nrésultats" as UC_ViewResults
+    usecase "Analyser les\nerreurs" as UC_AnalyzeErrors
+    usecase "Enregistrer le\nstatut (OK/KO)" as UC_RecordStatus
+    usecase "Ajouter des\ncommentaires" as UC_AddComments
+  }
+
+  ' ========== Analyse et Reporting ==========
+  package "Analyse et Reporting" #PeachPuff {
+    usecase "Consulter le\ntableau de bord" as UC_Dashboard
+    usecase "Visualiser les\nstatistiques" as UC_ViewStats
+    usecase "Voir graphique\ndistribution (Pie)" as UC_PieChart
+    usecase "Voir graphique\nOK/KO journalier (Bar)" as UC_BarChart
+    usecase "Voir évolution\ndes tests (Line)" as UC_LineChart
+    usecase "Filtrer par\npériode" as UC_FilterPeriod
+  }
+
+  ' ========== Navigation ==========
+  package "Navigation" #LightGray {
+    usecase "Accéder au\ndashboard testeur" as UC_TesterDashboard
+    usecase "Accéder à\nl'analyse" as UC_AccessAnalysis
+    usecase "Rafraîchir les\ndonnées" as UC_RefreshData
+  }
+}
+
+' ==================================================
+' RELATIONS PRINCIPALES
+' ==================================================
+
+' --- Authentification ---
+Tester -down-> UC_Login
+Tester -down-> UC_Logout
+
+' --- Gestion des Suites de Tests ---
+Tester -down-> UC_CreateSuite
+Tester -down-> UC_ViewSuites
+Tester -down-> UC_UpdateSuite
+Tester -down-> UC_DeleteSuite
+
+' --- Gestion des Exécutions ---
+Tester -down-> UC_CreateExecution
+Tester -down-> UC_ViewExecutions
+Tester -down-> UC_DeleteExecution
+Tester -down-> UC_ViewResults
+
+' --- Analyse et Reporting ---
+Tester -down-> UC_Dashboard
+Tester -down-> UC_ViewStats
+
+' --- Navigation ---
+Tester -down-> UC_TesterDashboard
+Tester -down-> UC_AccessAnalysis
+Tester -down-> UC_RefreshData
+
+' ==================================================
+' RELATIONS ENTRE CAS D'UTILISATION
+' ==================================================
+
+' --- Extensions ---
+UC_Login .right.> UC_GetRole : <<extend>>
+UC_ViewSuites .down.> UC_SelectSuite : <<extend>>
+UC_ViewExecutions .down.> UC_FilterBySuite : <<extend>>
+UC_ViewResults .right.> UC_AnalyzeErrors : <<extend>>
+UC_ViewStats .down.> UC_FilterPeriod : <<extend>>
+
+' --- Inclusions ---
+UC_CreateSuite .down.> UC_ConfigSelenium : <<include>>
+UC_CreateSuite .down.> UC_AddDescription : <<include>>
+
+UC_CreateExecution .down.> UC_RecordStatus : <<include>>
+UC_CreateExecution .down.> UC_AddComments : <<include>>
+
+UC_ViewStats .down.> UC_PieChart : <<include>>
+UC_ViewStats .down.> UC_BarChart : <<include>>
+UC_ViewStats .down.> UC_LineChart : <<include>>
+
+UC_Dashboard .down.> UC_TesterDashboard : <<include>>
+UC_Dashboard .down.> UC_AccessAnalysis : <<include>>
+
+' ==================================================
+' NOTES ET LÉGENDES
+' ==================================================
+
+note right of Tester
+  **Rôle : Testeur**
+
+  **Responsabilités :**
+  • Créer et gérer les suites de tests
+  • Exécuter les tests
+  • Enregistrer les résultats (OK/KO)
+  • Consulter les statistiques
+  • Analyser les erreurs
+end note
+
+note top of UC_CreateSuite
+  **Création d'une suite :**
+  • Nom de la suite
+  • URL Selenium
+  • Description
+  • Date de création
+end note
+
+note bottom of UC_CreateExecution
+  **Création d'une exécution :**
+  • Associer à une suite
+  • Statut (OK/KO)
+  • Commentaires optionnels
+  • Date d'exécution
+end note
+
+note right of UC_ViewStats
+  **Analyse visuelle :**
+  • Distribution des résultats
+  • Tendances journalières
+  • Évolution temporelle
+  • Filtrage par période
+end note
+
+legend right
+  |<#LightCyan> Authentification |
+  |<#Lavender> Gestion Suites Tests |
+  |<#LightSalmon> Gestion Exécutions |
+  |<#PeachPuff> Analyse & Reporting |
+  |<#LightGray> Navigation |
+endlegend
+
+@enduml

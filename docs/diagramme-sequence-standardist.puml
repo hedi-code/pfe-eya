@@ -1,0 +1,146 @@
+@startuml Diagramme de Séquence - Achat de Services Standardist
+
+actor "Client" as Client
+participant "StandardistComponent" as Standardist
+
+title Séquence d'Achat de Services Standardist
+
+== Initialisation ==
+
+Client -> Standardist : Accéder à la page
+activate Standardist
+
+Standardist -> Standardist : ngOnInit()
+Standardist -> Standardist : filterStandardists()
+Standardist -> Standardist : selectedCategory = 'all'
+Standardist -> Standardist : filteredStandardists = standardists
+Standardist --> Client : Afficher liste des services
+deactivate Standardist
+
+== Filtrage par Catégorie ==
+
+Client -> Standardist : Sélectionner une catégorie
+activate Standardist
+
+Standardist -> Standardist : selectedCategory = catégorie
+Standardist -> Standardist : filterStandardists()
+
+alt Catégorie = 'all'
+    Standardist -> Standardist : filteredStandardists = tous les services
+else Catégorie spécifique
+    Standardist -> Standardist : filteredStandardists = services filtrés
+end
+
+Standardist --> Client : Afficher services filtrés
+deactivate Standardist
+
+== Ajout de Services à la Sélection ==
+
+Client -> Standardist : Cliquer "Ajouter" sur un service
+activate Standardist
+
+Standardist -> Standardist : addToSelection(standardist)
+
+alt Service déjà dans sélection
+    Standardist -> Standardist : existing.quantity++
+else Nouveau service
+    Standardist -> Standardist : selectedItems.push({standardist, quantity: 1})
+end
+
+Standardist --> Client : Mise à jour badge panier
+deactivate Standardist
+
+== Gestion du Panier ==
+
+Client -> Standardist : Accéder à l'onglet "Sélection"
+activate Standardist
+
+Standardist -> Standardist : setActiveTab('selection')
+Standardist --> Client : Afficher panier avec services sélectionnés
+deactivate Standardist
+
+Client -> Standardist : Modifier quantité d'un service
+activate Standardist
+
+Standardist -> Standardist : updateQuantity(standardistId, quantity)
+
+alt Quantité > 0
+    Standardist -> Standardist : item.quantity = quantity
+else Quantité <= 0
+    Standardist -> Standardist : removeFromSelection(standardistId)
+end
+
+Standardist -> Standardist : Recalculer getTotalPrice()
+Standardist --> Client : Afficher total mis à jour
+deactivate Standardist
+
+Client -> Standardist : Supprimer un service
+activate Standardist
+
+Standardist -> Standardist : removeFromSelection(standardistId)
+Standardist -> Standardist : selectedItems = items filtrés
+Standardist -> Standardist : Recalculer getTotalPrice()
+Standardist --> Client : Afficher panier mis à jour
+deactivate Standardist
+
+== Finalisation de la Commande ==
+
+Client -> Standardist : Accéder à l'onglet "Finalisation"
+activate Standardist
+
+Standardist -> Standardist : setActiveTab('finalization')
+Standardist -> Standardist : showFinalizationTab()
+
+alt Panier vide
+    Standardist --> Client : Alert "Sélectionner au moins un service"
+    Standardist -> Standardist : activeTab = 'products'
+else Panier non vide
+    Standardist --> Client : Afficher formulaire client
+end
+
+deactivate Standardist
+
+Client -> Standardist : Remplir informations client
+Client -> Standardist : Cliquer "Générer la facture"
+activate Standardist
+
+Standardist -> Standardist : openInvoiceDialog()
+
+alt Informations client incomplètes
+    Standardist --> Client : Alert "Remplir informations obligatoires"
+else Informations complètes
+    Standardist -> Standardist : showInvoiceDialog = true
+    Standardist --> Client : Afficher modal facture
+end
+
+deactivate Standardist
+
+== Confirmation de la Commande ==
+
+Client -> Standardist : Consulter facture
+Client -> Standardist : Cliquer "Confirmer l'achat"
+activate Standardist
+
+Standardist -> Standardist : confirmPurchase()
+Standardist -> Standardist : console.log({customer, items, total})
+Standardist --> Client : Alert "Commande confirmée"
+
+Standardist -> Standardist : Réinitialiser selectedItems
+Standardist -> Standardist : Réinitialiser customerInfo
+Standardist -> Standardist : activeTab = 'products'
+Standardist -> Standardist : closeInvoiceDialog()
+
+Standardist --> Client : Retour à la page produits
+deactivate Standardist
+
+== Annulation ==
+
+Client -> Standardist : Cliquer "Annuler" dans la facture
+activate Standardist
+
+Standardist -> Standardist : closeInvoiceDialog()
+Standardist -> Standardist : showInvoiceDialog = false
+Standardist --> Client : Fermer modal
+deactivate Standardist
+
+@enduml

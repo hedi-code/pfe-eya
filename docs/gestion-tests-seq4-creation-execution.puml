@@ -1,0 +1,43 @@
+@startuml Séquence 4 - Création d'une Exécution de Test
+
+actor "Testeur" as Tester
+participant "TesterDashboardComponent" as Dashboard
+participant "TestService" as TestSvc
+participant "SupabaseService" as Supabase
+database "Supabase DB" as DB
+
+title Création d'une Exécution de Test
+
+Tester -> Dashboard : Remplir détails exécution
+Tester -> Dashboard : Cliquer "Créer Exécution"
+activate Dashboard
+
+Dashboard -> Dashboard : newTest.test_cahier_id = selectedcahierId
+Dashboard -> TestSvc : createTestExecution(newTest)
+activate TestSvc
+
+TestSvc -> Supabase : supabase.from('test_executions').insert([execution])
+activate Supabase
+
+Supabase -> DB : INSERT INTO test_executions
+activate DB
+DB --> Supabase : Exécution créée
+deactivate DB
+
+Supabase --> TestSvc : {error}
+deactivate Supabase
+
+TestSvc --> Dashboard : {error}
+deactivate TestSvc
+
+alt Création réussie
+    Dashboard -> Dashboard : Réinitialiser newTest
+    Dashboard -> Dashboard : loadTestsForcahier(selectedcahierId)
+    Dashboard --> Tester : Afficher exécutions mises à jour
+else Erreur
+    Dashboard --> Tester : Afficher message d'erreur
+end
+
+deactivate Dashboard
+
+@enduml

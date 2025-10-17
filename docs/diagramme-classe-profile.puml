@@ -1,0 +1,86 @@
+@startuml Diagramme de Classe - Profile
+
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor LightBlue
+  BorderColor DarkBlue
+  ArrowColor Black
+}
+
+' ==================================================
+' CLASSE PROFILE
+' ==================================================
+
+class Profile {
+  ' Attributs
+  - id: UUID {PK}
+  - email: string {unique}
+  - full_name: string
+  - role: string
+  - created_at: timestamp
+  - updated_at: timestamp
+
+  ' Méthodes
+  + getProfile(id: UUID): Profile
+  + getAllProfiles(): Profile[]
+  + createProfile(data: ProfileData): Profile
+  + updateProfile(id: UUID, updates: ProfileData): Profile
+  + deleteProfile(id: UUID): boolean
+  + getUserRole(userId: UUID): string
+  + validateRole(role: string): boolean
+}
+
+' ==================================================
+' ÉNUMÉRATIONS
+' ==================================================
+
+enum UserRole {
+  ADMIN
+  TESTEUR
+}
+
+' ==================================================
+' RELATIONS
+' ==================================================
+
+Profile "1" --> "1" UserRole : a un rôle
+
+' ==================================================
+' NOTES
+' ==================================================
+
+note right of Profile
+  **Table: profiles**
+
+  **Rôles disponibles:**
+  • admin: Accès complet au système
+  • testeur: Gestion des tests uniquement
+
+  **Contraintes:**
+  • email doit être unique
+  • role doit être "admin" ou "testeur"
+  • id est lié à auth.users (Supabase Auth)
+
+  **Timestamps:**
+  • created_at: Généré automatiquement
+  • updated_at: Mis à jour automatiquement
+end note
+
+note top of UserRole
+  Rôles du système
+end note
+
+' ==================================================
+' LÉGENDE
+' ==================================================
+
+legend bottom left
+  **Conventions:**
+  PK = Primary Key (Clé primaire)
+  UUID = Identifiant unique universel
+
+  **Relations:**
+  Profile est lié à auth.users de Supabase
+endlegend
+
+@enduml

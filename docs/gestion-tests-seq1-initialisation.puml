@@ -1,0 +1,38 @@
+@startuml Séquence 1 - Initialisation et Chargement des Cahier de Tests
+
+actor "Testeur" as Tester
+participant "TesterDashboardComponent" as Dashboard
+participant "TestService" as TestSvc
+participant "SupabaseService" as Supabase
+database "Supabase DB" as DB
+
+title Initialisation et Chargement des cahiers de Tests
+
+Tester -> Dashboard : Accéder au dashboard testeur
+activate Dashboard
+
+Dashboard -> Dashboard : ngOnInit()
+Dashboard -> Dashboard : loadcahiers()
+
+Dashboard -> TestSvc : getTestcahiers()
+activate TestSvc
+
+TestSvc -> Supabase : supabase.from('test_cahiers').select('*')
+activate Supabase
+
+Supabase -> DB : SELECT * FROM test_cahiers
+activate DB
+DB --> Supabase : Liste des cahiers de tests
+deactivate DB
+
+Supabase --> TestSvc : {data, error}
+deactivate Supabase
+
+TestSvc --> Dashboard : {data, error}
+deactivate TestSvc
+
+Dashboard -> Dashboard : testcahiers = data || []
+Dashboard --> Tester : Afficher cahiers de tests
+deactivate Dashboard
+
+@enduml

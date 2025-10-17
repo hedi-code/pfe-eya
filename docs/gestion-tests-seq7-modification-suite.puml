@@ -1,0 +1,51 @@
+@startuml Séquence 7 - Modification d'une Cahier de Tests
+
+actor "Testeur" as Tester
+participant "TesterDashboardComponent" as Dashboard
+participant "TestService" as TestSvc
+participant "SupabaseService" as Supabase
+database "Supabase DB" as DB
+
+title Modification d'une Cahier de Tests
+
+Tester -> Dashboard : Cliquer "Modifier" sur une Cahier
+activate Dashboard
+
+Dashboard -> Dashboard : Charger les données de la Cahier
+Dashboard -> Dashboard : Remplir le formulaire avec données existantes
+Dashboard --> Tester : Afficher formulaire de modification
+deactivate Dashboard
+
+Tester -> Dashboard : Modifier les champs (nom, URL, description)
+Tester -> Dashboard : Cliquer "Enregistrer les modifications"
+activate Dashboard
+
+Dashboard -> Dashboard : Valider les données
+Dashboard -> TestSvc : updateTestCahier(id, updatedData)
+activate TestSvc
+
+TestSvc -> Supabase : supabase.from('test_Cahiers').update(updates).eq('id', id)
+activate Supabase
+
+Supabase -> DB : UPDATE test_Cahiers SET ... WHERE id = ?
+activate DB
+DB --> Supabase : Cahier mise à jour
+deactivate DB
+
+Supabase --> TestSvc : {error}
+deactivate Supabase
+
+TestSvc --> Dashboard : {error}
+deactivate TestSvc
+
+alt Modification réussie
+    Dashboard -> Dashboard : loadCahiers()
+    Dashboard --> Tester : Afficher Cahiers mises à jour
+    Dashboard --> Tester : Message de confirmation
+else Erreur
+    Dashboard --> Tester : Afficher message d'erreur
+end
+
+deactivate Dashboard
+
+@enduml

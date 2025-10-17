@@ -1,0 +1,226 @@
+@startuml Diagramme de Séquence - Gestion des Tests
+
+actor "Testeur" as Tester
+participant "TesterDashboardComponent" as Dashboard
+participant "TestService" as TestSvc
+participant "SupabaseService" as Supabase
+database "Supabase DB" as DB
+
+'================================================================
+' SÉQUENCE 1 : INITIALISATION ET CHARGEMENT DES SUITES DE TESTS
+'================================================================
+
+@startuml Séquence 1 - Initialisation
+
+Tester -> Dashboard : Accéder au dashboard testeur
+activate Dashboard
+
+Dashboard -> Dashboard : ngOnInit()
+Dashboard -> Dashboard : loadSuites()
+
+Dashboard -> TestSvc : getTestSuites()
+activate TestSvc
+
+TestSvc -> Supabase : supabase.from('test_suites').select('*')
+activate Supabase
+
+Supabase -> DB : SELECT * FROM test_suites
+activate DB
+DB --> Supabase : Liste des suites de tests
+deactivate DB
+
+Supabase --> TestSvc : {data, error}
+deactivate Supabase
+
+TestSvc --> Dashboard : {data, error}
+deactivate TestSvc
+
+Dashboard -> Dashboard : testSuites = data || []
+Dashboard --> Tester : Afficher suites de tests
+deactivate Dashboard
+
+@enduml
+
+'================================================================
+' SÉQUENCE 2 : CRÉATION D'UNE SUITE DE TESTS
+'================================================================
+
+@startuml Séquence 2 - Création Suite de Tests
+
+Tester -> Dashboard : Remplir formulaire nouvelle suite
+Tester -> Dashboard : Cliquer "Créer Suite"
+activate Dashboard
+
+Dashboard -> TestSvc : createTestSuite(newSuite)
+activate TestSvc
+
+TestSvc -> Supabase : supabase.from('test_suites').insert([suite])
+activate Supabase
+
+Supabase -> DB : INSERT INTO test_suites
+activate DB
+DB --> Supabase : Suite créée
+deactivate DB
+
+Supabase --> TestSvc : {error}
+deactivate Supabase
+
+TestSvc --> Dashboard : {error}
+deactivate TestSvc
+
+alt Création réussie
+    Dashboard -> Dashboard : Réinitialiser newSuite
+    Dashboard -> Dashboard : loadSuites()
+    Dashboard --> Tester : Afficher suites mises à jour
+else Erreur
+    Dashboard --> Tester : Afficher message d'erreur
+end
+
+deactivate Dashboard
+
+@enduml
+
+'================================================================
+' SÉQUENCE 3 : SÉLECTION ET AFFICHAGE DES EXÉCUTIONS DE TESTS
+'================================================================
+
+@startuml Séquence 3 - Affichage Exécutions
+
+Tester -> Dashboard : Cliquer sur une suite de tests
+activate Dashboard
+
+Dashboard -> Dashboard : selectSuite(id)
+Dashboard -> Dashboard : selectedSuiteId = id
+Dashboard -> Dashboard : selectedSuite = suite trouvée
+Dashboard -> Dashboard : loadTestsForSuite(id)
+
+Dashboard -> TestSvc : supabase.from('test_executions').select('*').eq('test_suite_id', suiteId)
+activate TestSvc
+
+TestSvc -> Supabase : Query test_executions
+activate Supabase
+
+Supabase -> DB : SELECT * FROM test_executions WHERE test_suite_id = ?
+activate DB
+DB --> Supabase : Liste des exécutions
+deactivate DB
+
+Supabase --> TestSvc : {data, error}
+deactivate Supabase
+
+TestSvc --> Dashboard : {data, error}
+deactivate TestSvc
+
+Dashboard -> Dashboard : testExecutions = data || []
+Dashboard --> Tester : Afficher exécutions de tests
+deactivate Dashboard
+
+@enduml
+
+'================================================================
+' SÉQUENCE 4 : CRÉATION D'UNE EXÉCUTION DE TEST
+'================================================================
+
+@startuml Séquence 4 - Création Exécution de Test
+
+Tester -> Dashboard : Remplir détails exécution
+Tester -> Dashboard : Cliquer "Créer Exécution"
+activate Dashboard
+
+Dashboard -> Dashboard : newTest.test_suite_id = selectedSuiteId
+Dashboard -> TestSvc : createTestExecution(newTest)
+activate TestSvc
+
+TestSvc -> Supabase : supabase.from('test_executions').insert([execution])
+activate Supabase
+
+Supabase -> DB : INSERT INTO test_executions
+activate DB
+DB --> Supabase : Exécution créée
+deactivate DB
+
+Supabase --> TestSvc : {error}
+deactivate Supabase
+
+TestSvc --> Dashboard : {error}
+deactivate TestSvc
+
+alt Création réussie
+    Dashboard -> Dashboard : Réinitialiser newTest
+    Dashboard -> Dashboard : loadTestsForSuite(selectedSuiteId)
+    Dashboard --> Tester : Afficher exécutions mises à jour
+else Erreur
+    Dashboard --> Tester : Afficher message d'erreur
+end
+
+deactivate Dashboard
+
+@enduml
+
+'================================================================
+' SÉQUENCE 5 : SUPPRESSION D'UNE SUITE DE TESTS
+'================================================================
+
+@startuml Séquence 5 - Suppression Suite de Tests
+
+Tester -> Dashboard : Cliquer "Supprimer" sur une suite
+activate Dashboard
+
+Dashboard -> TestSvc : deleteTestSuite(id)
+activate TestSvc
+
+TestSvc -> Supabase : supabase.from('test_suites').delete().eq('id', id)
+activate Supabase
+
+Supabase -> DB : DELETE FROM test_suites WHERE id = ?
+activate DB
+DB --> Supabase : Confirmation
+deactivate DB
+
+Supabase --> TestSvc : Résultat
+deactivate Supabase
+
+TestSvc --> Dashboard : Résultat
+deactivate TestSvc
+
+Dashboard -> Dashboard : loadSuites()
+Dashboard -> Dashboard : testExecutions = []
+Dashboard -> Dashboard : selectedSuiteId = null
+Dashboard --> Tester : Afficher suites mises à jour
+deactivate Dashboard
+
+@enduml
+
+'================================================================
+' SÉQUENCE 6 : SUPPRESSION D'UNE EXÉCUTION DE TEST
+'================================================================
+
+@startuml Séquence 6 - Suppression Exécution de Test
+
+Tester -> Dashboard : Cliquer "Supprimer" sur une exécution
+activate Dashboard
+
+Dashboard -> TestSvc : deleteTestExecution(id)
+activate TestSvc
+
+TestSvc -> Supabase : supabase.from('test_executions').delete().eq('id', id)
+activate Supabase
+
+Supabase -> DB : DELETE FROM test_executions WHERE id = ?
+activate DB
+DB --> Supabase : Confirmation
+deactivate DB
+
+Supabase --> TestSvc : Résultat
+deactivate Supabase
+
+TestSvc --> Dashboard : Résultat
+deactivate TestSvc
+
+Dashboard -> Dashboard : loadTestsForSuite(selectedSuiteId)
+Dashboard --> Tester : Afficher exécutions mises à jour
+deactivate Dashboard
+
+@enduml
+
+@enduml

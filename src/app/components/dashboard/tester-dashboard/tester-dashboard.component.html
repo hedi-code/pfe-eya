@@ -1,0 +1,257 @@
+<div class="animate-fade-in">
+  <!-- Header Section -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between mb-2">
+      <h1 class="text-3xl font-bold text-gradient">Gestion des Tests</h1>
+      <div class="flex items-center space-x-2">
+        <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+        <span class="text-sm text-gray-500">En ligne</span>
+      </div>
+    </div>
+    <p class="text-gray-600">Créez et gérez vos suites de tests automatisés</p>
+  </div>
+
+  <!-- Create Test Suite Section -->
+  <div class="card-modern p-6 mb-8 animate-slide-up">
+    <div class="flex items-center mb-6">
+      <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl flex items-center justify-center mr-4">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-gray-800">Nouvelle Suite de Test</h2>
+        <p class="text-gray-600 text-sm">Configurez votre suite de tests automatisés</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="space-y-2">
+        <label class="text-sm font-semibold text-gray-700">Nom de la Suite</label>
+        <input
+          type="text"
+          placeholder="Ex: Tests de régression UI"
+          [(ngModel)]="newSuite.name"
+          class="input-modern"
+        />
+      </div>
+      <div class="space-y-2">
+        <label class="text-sm font-semibold text-gray-700">URL du Script Selenium</label>
+        <input
+          type="text"
+          placeholder="https://..."
+          [(ngModel)]="newSuite.selenium_script_url"
+          class="input-modern"
+        />
+      </div>
+      <div class="space-y-2">
+        <label class="text-sm font-semibold text-gray-700">Description</label>
+        <input
+          type="text"
+          placeholder="Description de la suite..."
+          [(ngModel)]="newSuite.description"
+          class="input-modern"
+        />
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-end">
+      <button
+        (click)="createTestSuite()"
+        class="btn-modern btn-primary px-8"
+      >
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>
+        Créer la Suite
+      </button>
+    </div>
+  </div>
+
+  <!-- Test Suites Management -->
+  <div class="card-modern animate-slide-up" style="animation-delay: 0.2s">
+    <div class="p-6 border-b border-gray-100">
+      <div class="flex items-center">
+        <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-500 rounded-xl flex items-center justify-center mr-4">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-gray-800">Suites de Test</h2>
+          <p class="text-gray-600 text-sm">{{testSuites.length}} suite(s) disponible(s)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="px-6 pt-4">
+      <div class="flex overflow-x-auto space-x-2 pb-4" *ngIf="testSuites.length > 0">
+        <button
+          *ngFor="let suite of testSuites; trackBy: trackBySuiteId"
+          (click)="selectSuite(suite.id)"
+          [ngClass]="{
+            'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg': selectedSuiteId === suite.id,
+            'bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-600': selectedSuiteId !== suite.id
+          }"
+          class="px-6 py-3 rounded-xl font-semibold whitespace-nowrap transition-all duration-200 flex items-center min-w-max"
+        >
+          <div class="w-2 h-2 rounded-full mr-2"
+               [ngClass]="selectedSuiteId === suite.id ? 'bg-white' : 'bg-red-400'"></div>
+          {{ suite.name }}
+        </button>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="testSuites.length === 0" class="text-center py-12">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-800 mb-2">Aucune suite de test</h3>
+        <p class="text-gray-600">Créez votre première suite de test pour commencer</p>
+      </div>
+    </div>
+
+    <!-- Selected Suite Content -->
+    <div *ngIf="selectedSuite" class="p-6 pt-0 animate-fade-in">
+      <!-- Suite Header -->
+      <div class="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-6 mb-6 border border-gray-100">
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">{{ selectedSuite.name }}</h3>
+            <p class="text-gray-600 mb-3">{{ selectedSuite.description }}</p>
+            <div class="flex items-center text-sm text-gray-500">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+              </svg>
+              {{ selectedSuite.selenium_script_url }}
+            </div>
+          </div>
+          <button
+            (click)="deleteTestSuite(selectedSuite.id)"
+            class="btn-modern bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+            Supprimer
+          </button>
+        </div>
+      </div>
+
+      <!-- Add Test Execution -->
+      <div class="bg-blue-50 rounded-2xl p-6 mb-6 border border-blue-100">
+        <h4 class="font-bold text-gray-800 mb-4 flex items-center">
+          <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+          </div>
+          Ajouter un Test
+        </h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="text-sm font-semibold text-gray-700">Selenium Job ID</label>
+            <input
+              type="text"
+              placeholder="JOB_12345"
+              [(ngModel)]="newTest.selenium_job_id"
+              class="input-modern"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-semibold text-gray-700">Message d'erreur (optionnel)</label>
+            <input
+              type="text"
+              placeholder="Détails de l'erreur..."
+              [(ngModel)]="newTest.error_message"
+              class="input-modern"
+            />
+          </div>
+        </div>
+        <div class="mt-4 flex justify-end">
+          <button
+            (click)="createTestExecution()"
+            class="btn-modern btn-primary"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Ajouter le Test
+          </button>
+        </div>
+      </div>
+
+      <!-- Test Executions List -->
+      <div class="space-y-4">
+        <h4 class="font-bold text-gray-800 flex items-center">
+          <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+          Tests d'Exécution ({{ testExecutions.length }})
+        </h4>
+
+        <!-- Test Items -->
+        <div *ngIf="testExecutions.length > 0" class="space-y-3">
+          <div
+            *ngFor="let test of testExecutions; trackBy: trackByTestId"
+            class="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-200 animate-slide-up"
+          >
+            <div class="flex justify-between items-center">
+              <div class="flex-1">
+                <div class="flex items-center mb-2">
+                  <div class="w-3 h-3 rounded-full mr-3"
+                       [ngClass]="{
+                         'bg-green-400': test.status === 'passed',
+                         'bg-red-400': test.status === 'failed',
+                         'bg-yellow-400': test.status === 'pending',
+                         'bg-blue-400': test.status === 'running'
+                       }"></div>
+                  <span class="font-semibold text-gray-800">Job ID: {{ test.selenium_job_id }}</span>
+                </div>
+                <div class="flex items-center text-sm text-gray-600 space-x-4">
+                  <span class="flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Status: <span class="ml-1 capitalize font-medium"
+                                 [ngClass]="{
+                                   'text-green-600': test.status === 'passed',
+                                   'text-red-600': test.status === 'failed',
+                                   'text-yellow-600': test.status === 'pending',
+                                   'text-blue-600': test.status === 'running'
+                                 }">{{ test.status }}</span>
+                  </span>
+                </div>
+                <div *ngIf="test.error_message" class="mt-2 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg">
+                  {{ test.error_message }}
+                </div>
+              </div>
+              <button
+                (click)="deleteTestExecution(test.id)"
+                class="btn-modern bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2 text-sm"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State for Tests -->
+        <div *ngIf="testExecutions.length === 0" class="text-center py-8 bg-gray-50 rounded-xl">
+          <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+          </div>
+          <p class="text-gray-500">Aucun test dans cette suite</p>
+          <p class="text-sm text-gray-400">Ajoutez votre premier test pour commencer</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

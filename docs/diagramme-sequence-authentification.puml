@@ -1,0 +1,74 @@
+@startuml Diagramme de Séquence - Authentification
+
+actor "Utilisateur" as User
+participant "LoginComponent" as Login
+participant "SupabaseService" as Supabase
+database "Supabase DB" as DB
+participant "Router" as Router
+participant "DashboardComponent" as Dashboard
+
+title Séquence d'Authentification
+
+User -> Login : Saisir email et mot de passe
+activate Login
+
+User -> Login : Cliquer sur "Se connecter"
+Login -> Login : Valider le formulaire
+alt Formulaire invalide
+    Login -> User : Afficher erreurs de validation
+else Formulaire valide
+    Login -> Login : loginInProgress = true
+
+    Login -> Supabase : signIn(email, password)
+    activate Supabase
+
+    Supabase -> DB : auth.signInWithPassword()
+    activate DB
+    DB --> Supabase : Session + User
+    deactivate DB
+
+    alt Authentification réussie
+        Supabase -> DB : Récupérer rôle depuis profiles
+        activate DB
+        DB --> Supabase : role
+        deactivate DB
+
+        Supabase -> Supabase : Mettre à jour user$.next()
+        Supabase --> Login : {user, session}
+        deactivate Supabase
+
+        Login -> Supabase : onAuthStateChange()
+        activate Supabase
+        Supabase -> Login : Notification de changement d'état
+        deactivate Supabase
+
+        Login -> Supabase : getUserRole(userId)
+        activate Supabase
+        Supabase -> DB : SELECT role FROM profiles
+        activate DB
+        DB --> Supabase : role
+        deactivate DB
+        Supabase --> Login : role
+        deactivate Supabase
+
+        Login -> Router : navigate(['/dashboard'])
+        activate Router
+        Router -> Dashboard : Initialiser
+        activate Dashboard
+        Dashboard -> Supabase : Récupérer user$
+        Dashboard --> User : Afficher dashboard
+        deactivate Dashboard
+        deactivate Router
+
+    else Authentification échouée
+        Supabase --> Login : error
+        Login -> Login : errors.push(error)
+        Login --> User : Afficher message d'erreur
+    end
+
+    Login -> Login : loginInProgress = false
+end
+
+deactivate Login
+
+@enduml

@@ -1,0 +1,181 @@
+@startuml Diagramme de Cas d'Utilisation - Vue Globale
+
+left to right direction
+skinparam packageStyle rectangle
+
+' ==================================================
+' ACTEURS
+' ==================================================
+
+actor "Administrateur" as Admin
+actor "Testeur" as Tester
+actor "Client" as Client
+actor "Système Supabase" as Supabase
+
+' Héritage des rôles
+Admin -up-|> Tester : hérite de
+
+' ==================================================
+' SYSTÈME
+' ==================================================
+
+rectangle "Système de Gestion de Tests" {
+
+  ' ========== Authentification ==========
+  package "Authentification" {
+    usecase "S'authentifier" as UC_Login
+    usecase "Se déconnecter" as UC_Logout
+    usecase "Gérer la session" as UC_Session
+  }
+
+  ' ========== Gestion des Utilisateurs ==========
+  package "Gestion des Utilisateurs" {
+    usecase "Créer un utilisateur" as UC_CreateUser
+    usecase "Consulter les utilisateurs" as UC_ViewUsers
+    usecase "Modifier un utilisateur" as UC_UpdateUser
+    usecase "Supprimer un utilisateur" as UC_DeleteUser
+    usecase "Assigner un rôle" as UC_AssignRole
+  }
+
+  ' ========== Gestion des Suites de Tests ==========
+  package "Gestion des Suites de Tests" {
+    usecase "Créer une suite de tests" as UC_CreateSuite
+    usecase "Consulter les suites de tests" as UC_ViewSuites
+    usecase "Modifier une suite de tests" as UC_UpdateSuite
+    usecase "Supprimer une suite de tests" as UC_DeleteSuite
+    usecase "Configurer script Selenium" as UC_ConfigSelenium
+  }
+
+  ' ========== Gestion des Exécutions de Tests ==========
+  package "Gestion des Exécutions" {
+    usecase "Lancer une exécution de test" as UC_RunTest
+    usecase "Consulter les exécutions" as UC_ViewExecutions
+    usecase "Consulter les résultats" as UC_ViewResults
+    usecase "Supprimer une exécution" as UC_DeleteExecution
+    usecase "Analyser les erreurs" as UC_AnalyzeErrors
+  }
+
+  ' ========== Analyse et Reporting ==========
+  package "Analyse et Reporting" {
+    usecase "Visualiser les statistiques" as UC_ViewStats
+    usecase "Consulter graphiques OK/KO" as UC_ViewCharts
+    usecase "Analyser la distribution des tests" as UC_AnalyzeDistribution
+    usecase "Suivre l'évolution des tests" as UC_TrackEvolution
+  }
+
+  ' ========== Module Standardist ==========
+  package "Gestion des Services" {
+    usecase "Consulter le catalogue" as UC_ViewCatalog
+    usecase "Filtrer les services" as UC_FilterServices
+    usecase "Ajouter au panier" as UC_AddToCart
+    usecase "Gérer le panier" as UC_ManageCart
+    usecase "Finaliser la commande" as UC_Checkout
+    usecase "Générer une facture" as UC_GenerateInvoice
+    usecase "Confirmer l'achat" as UC_ConfirmPurchase
+  }
+}
+
+' ==================================================
+' RELATIONS ACTEURS - CAS D'UTILISATION
+' ==================================================
+
+' --- Authentification (tous les utilisateurs) ---
+Admin --> UC_Login
+Admin --> UC_Logout
+Tester --> UC_Login
+Tester --> UC_Logout
+Client --> UC_Login
+Client --> UC_Logout
+
+' --- Gestion des Utilisateurs (Administrateur) ---
+Admin --> UC_CreateUser
+Admin --> UC_ViewUsers
+Admin --> UC_UpdateUser
+Admin --> UC_DeleteUser
+Admin --> UC_AssignRole
+
+' --- Gestion des Suites de Tests (Testeur + Admin) ---
+Tester --> UC_CreateSuite
+Tester --> UC_ViewSuites
+Tester --> UC_UpdateSuite
+Tester --> UC_DeleteSuite
+Tester --> UC_ConfigSelenium
+
+' --- Gestion des Exécutions (Testeur + Admin) ---
+Tester --> UC_RunTest
+Tester --> UC_ViewExecutions
+Tester --> UC_ViewResults
+Tester --> UC_DeleteExecution
+Tester --> UC_AnalyzeErrors
+
+' --- Analyse et Reporting (Testeur + Admin) ---
+Tester --> UC_ViewStats
+Tester --> UC_ViewCharts
+Tester --> UC_AnalyzeDistribution
+Tester --> UC_TrackEvolution
+
+' --- Module Standardist (Client) ---
+Client --> UC_ViewCatalog
+Client --> UC_FilterServices
+Client --> UC_AddToCart
+Client --> UC_ManageCart
+Client --> UC_Checkout
+Client --> UC_GenerateInvoice
+Client --> UC_ConfirmPurchase
+
+' ==================================================
+' RELATIONS ENTRE CAS D'UTILISATION
+' ==================================================
+
+' --- Extensions ---
+UC_Login ..> UC_Session : <<extend>>
+UC_CreateUser ..> UC_AssignRole : <<include>>
+UC_RunTest ..> UC_ViewResults : <<include>>
+UC_Checkout ..> UC_GenerateInvoice : <<include>>
+UC_ConfirmPurchase ..> UC_GenerateInvoice : <<include>>
+
+' --- Inclusions ---
+UC_CreateSuite ..> UC_ConfigSelenium : <<include>>
+UC_ViewStats ..> UC_ViewCharts : <<include>>
+UC_ViewStats ..> UC_AnalyzeDistribution : <<include>>
+
+' ==================================================
+' RELATIONS AVEC SYSTÈMES EXTERNES
+' ==================================================
+
+UC_Login --> Supabase : authentifie
+UC_CreateUser --> Supabase : stocke
+UC_CreateSuite --> Supabase : stocke
+UC_RunTest --> Supabase : stocke résultats
+UC_ViewResults --> Supabase : récupère données
+
+' ==================================================
+' NOTES
+' ==================================================
+
+note right of Admin
+  L'administrateur hérite
+  de tous les droits du testeur
+  et peut en plus gérer
+  les utilisateurs
+end note
+
+note right of Tester
+  Le testeur peut créer,
+  exécuter et analyser
+  les suites de tests
+end note
+
+note right of Client
+  Le client peut consulter
+  et commander des services
+  de test standardisés
+end note
+
+note bottom of Supabase
+  Système externe gérant
+  l'authentification et
+  le stockage des données
+end note
+
+@enduml

@@ -1,0 +1,211 @@
+@startuml Diagramme de Classes - Système de Gestion de Tests
+
+' ==================================================
+' SERVICES
+' ==================================================
+
+class SupabaseService {
+  - supabase: SupabaseClient
+  - user$: BehaviorSubject<User | null>
+  - signingIn: boolean
+
+  + signUp(email: string, password: string, role: string): Promise
+  + signIn(email: string, password: string): Promise
+  + signOut(): Promise<void>
+  + getUserRole(userId: string): Promise<string | null>
+  + getCurrentUser(): User | null
+}
+
+class TestService {
+  - supabase: SupabaseClient
+  - user$: BehaviorSubject<User | null>
+
+  ' Gestion des profils
+  + createUser(user: Object): Promise
+  + getProfiles(): Promise
+  + getProfileById(id: string): Promise
+  + updateProfile(id: string, updates: any): Promise
+  + deleteProfile(id: string): Promise
+
+  ' Gestion des suites de tests
+  + getTestSuites(): Promise
+  + getTestSuiteById(id: string): Promise
+  + createTestSuite(suite: any): Promise
+  + updateTestSuite(id: string, updates: any): Promise
+  + deleteTestSuite(id: string): Promise
+
+  ' Gestion des exécutions de tests
+  + getTestExecutions(): Promise
+  + getTestExecutionById(id: string): Promise
+  + createTestExecution(execution: any): Promise
+  + updateTestExecution(id: string, updates: any): Promise
+  + deleteTestExecution(id: string): Promise
+
+  ' Gestion des résultats de tests
+  + getTestResults(): Promise
+  + getTestResultsByExecutionId(execution_id: string): Promise
+  + createTestResult(result: any): Promise
+  + updateTestResult(id: string, updates: any): Promise
+  + deleteTestResult(id: string): Promise
+}
+
+' ==================================================
+' COMPOSANTS
+' ==================================================
+
+class LoginComponent {
+  - loginForm: FormGroup
+  - loginInProgress: boolean
+  - errors: string[]
+
+  + ngOnInit(): void
+  + onSubmit(): Promise<void>
+}
+
+class DashboardComponent {
+  - role: string | null
+  - user$: BehaviorSubject<User | null>
+
+  + ngOnInit(): void
+  + logout(): void
+}
+
+class UsersManagementComponent {
+  - users: any[]
+  - loading: boolean
+  - showAddUserModal: boolean
+  - newUser: Object
+
+  + ngOnInit(): Promise<void>
+  + fetchUsers(): Promise<void>
+  + addUser(): Promise<void>
+  + deleteUser(id: any): void
+}
+
+class TesterDashboardComponent {
+  - testSuites: any[]
+  - selectedSuiteId: string | null
+  - testExecutions: any[]
+  - newSuite: Object
+  - newTest: Object
+  - selectedSuite: any
+
+  + ngOnInit(): Promise<void>
+  + selectSuite(id: string): void
+  + loadSuites(): Promise<void>
+  + loadTestsForSuite(suiteId: string): Promise<void>
+  + createTestSuite(): Promise<void>
+  + deleteTestSuite(id: string): Promise<void>
+  + createTestExecution(): Promise<void>
+  + deleteTestExecution(id: string): Promise<void>
+  + trackBySuiteId(index: number, suite: any): any
+  + trackByTestId(index: number, test: any): any
+}
+
+class TestAnalysisComponent {
+  - pieChartLabels: string[]
+  - pieChartData: ChartData<'pie'>
+  - barChartLabels: string[]
+  - barChartData: ChartData<'bar'>
+  - lineChartLabels: string[]
+  - lineChartData: ChartData<'line'>
+}
+
+class StandardistComponent {
+  - activeTab: string
+  - selectedItems: SelectedItem[]
+  - showInvoiceDialog: boolean
+  - customerInfo: CustomerInfo
+  - standardists: Standardist[]
+  - filteredStandardists: Standardist[]
+  - selectedCategory: string
+
+  + ngOnInit(): void
+  + filterStandardists(): void
+  + setActiveTab(tab: string): void
+  + addToSelection(standardist: Standardist): void
+  + removeFromSelection(standardistId: string): void
+  + updateQuantity(standardistId: string, quantity: number): void
+  + getTotalPrice(): number
+  + showFinalizationTab(): void
+  + openInvoiceDialog(): void
+  + closeInvoiceDialog(): void
+  + confirmPurchase(): void
+  + getSelectedItemsCount(): number
+  + trackByStandardistId(index: number, standardist: Standardist): string
+  + trackBySelectedItemId(index: number, item: SelectedItem): string
+}
+
+' ==================================================
+' INTERFACES / MODÈLES
+' ==================================================
+
+interface Standardist {
+  + id: string
+  + name: string
+  + description: string
+  + price: number
+  + category: string
+  + image: string
+}
+
+interface SelectedItem {
+  + standardist: Standardist
+  + quantity: number
+}
+
+interface CustomerInfo {
+  + name: string
+  + email: string
+  + phone: string
+  + address: string
+}
+
+' ==================================================
+' RELATIONS
+' ==================================================
+
+' Services utilisés par les composants
+LoginComponent --> SupabaseService : utilise
+DashboardComponent --> SupabaseService : utilise
+UsersManagementComponent --> TestService : utilise
+TesterDashboardComponent --> TestService : utilise
+
+' TestService dépend de SupabaseService
+TestService --> SupabaseService : dépend de
+
+' StandardistComponent utilise les interfaces
+StandardistComponent --> Standardist : utilise
+StandardistComponent --> SelectedItem : utilise
+StandardistComponent --> CustomerInfo : utilise
+SelectedItem --> Standardist : contient
+
+' Relations de navigation/composition
+DashboardComponent *-- TesterDashboardComponent : contient
+DashboardComponent *-- UsersManagementComponent : route vers
+DashboardComponent *-- TestAnalysisComponent : route vers
+
+' Angular Framework dependencies
+LoginComponent ..> FormBuilder : utilise
+LoginComponent ..> Router : utilise
+DashboardComponent ..> Router : utilise
+
+note right of SupabaseService
+  Service principal pour
+  l'authentification et
+  la gestion de session
+end note
+
+note right of TestService
+  Service pour gérer
+  les profils, suites de tests,
+  exécutions et résultats
+end note
+
+note bottom of TesterDashboardComponent
+  Composant principal pour
+  les testeurs permettant de
+  gérer les suites de tests
+end note
+
+@enduml

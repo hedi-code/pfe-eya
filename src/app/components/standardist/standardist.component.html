@@ -1,0 +1,501 @@
+<div class="animate-fade-in">
+  <!-- Header Section -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between mb-2">
+      <h1 class="text-3xl font-bold text-gradient">Services Standardisés</h1>
+      <div class="flex items-center space-x-4 bg-white rounded-xl px-4 py-2 shadow-md">
+        <div class="flex items-center space-x-2">
+          <div class="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-500 rounded-lg flex items-center justify-center">
+            <span class="text-white text-sm font-bold">{{getSelectedItemsCount()}}</span>
+          </div>
+          <span class="text-sm font-medium text-gray-600">Articles sélectionnés</span>
+        </div>
+        <div class="h-6 w-px bg-gray-300"></div>
+        <div class="text-lg font-bold text-gradient">{{getTotalPrice()}} €</div>
+      </div>
+    </div>
+    <p class="text-gray-600">Choisissez parmi nos services de test et support professionels</p>
+  </div>
+
+  <!-- Single Row Tab Navigation -->
+  <div class="card-modern p-6 mb-8 animate-slide-up">
+    <div class="flex justify-center">
+      <div class="flex space-x-2 bg-gray-100 rounded-2xl p-2">
+        <!-- Products Tab -->
+        <button
+          (click)="setActiveTab('products')"
+          [ngClass]="{
+            'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg': activeTab === 'products',
+            'text-gray-600 hover:text-red-600 hover:bg-red-50': activeTab !== 'products'
+          }"
+          class="px-8 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+          </svg>
+          Services
+        </button>
+
+        <!-- Selection Tab -->
+        <button
+          (click)="setActiveTab('selection')"
+          [ngClass]="{
+            'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg': activeTab === 'selection',
+            'text-gray-600 hover:text-blue-600 hover:bg-blue-50': activeTab !== 'selection'
+          }"
+          class="px-8 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center relative"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 8M17 21a2 2 0 100-4 2 2 0 000 4zm-8 0a2 2 0 100-4 2 2 0 000 4z"/>
+          </svg>
+          Panier
+          <span *ngIf="getSelectedItemsCount() > 0"
+                class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+            {{getSelectedItemsCount()}}
+          </span>
+        </button>
+
+        <!-- Finalization Tab -->
+        <button
+          (click)="setActiveTab('finalization')"
+          [ngClass]="{
+            'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg': activeTab === 'finalization',
+            'text-gray-600 hover:text-green-600 hover:bg-green-50': activeTab !== 'finalization'
+          }"
+          class="px-8 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Finalisation
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products Tab Content -->
+  <div *ngIf="activeTab === 'products'" class="animate-fade-in">
+    <!-- Category Filter -->
+    <div class="card-modern p-6 mb-8">
+      <h3 class="text-lg font-semibold mb-4 flex items-center">
+        <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"/>
+        </svg>
+        Filtrer par catégorie
+      </h3>
+      <div class="flex flex-wrap gap-2">
+        <button
+          (click)="selectedCategory = 'all'; filterStandardists()"
+          [ngClass]="{
+            'bg-gradient-to-r from-red-500 to-red-600 text-white': selectedCategory === 'all',
+            'bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-600': selectedCategory !== 'all'
+          }"
+          class="px-4 py-2 rounded-xl font-medium transition-all duration-200"
+        >
+          Tous les services
+        </button>
+        <button
+          (click)="selectedCategory = 'testing'; filterStandardists()"
+          [ngClass]="{
+            'bg-gradient-to-r from-red-500 to-red-600 text-white': selectedCategory === 'testing',
+            'bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-600': selectedCategory !== 'testing'
+          }"
+          class="px-4 py-2 rounded-xl font-medium transition-all duration-200"
+        >
+          Tests
+        </button>
+        <button
+          (click)="selectedCategory = 'security'; filterStandardists()"
+          [ngClass]="{
+            'bg-gradient-to-r from-red-500 to-red-600 text-white': selectedCategory === 'security',
+            'bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-600': selectedCategory !== 'security'
+          }"
+          class="px-4 py-2 rounded-xl font-medium transition-all duration-200"
+        >
+          Sécurité
+        </button>
+        <button
+          (click)="selectedCategory = 'training'; filterStandardists()"
+          [ngClass]="{
+            'bg-gradient-to-r from-red-500 to-red-600 text-white': selectedCategory === 'training',
+            'bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-600': selectedCategory !== 'training'
+          }"
+          class="px-4 py-2 rounded-xl font-medium transition-all duration-200"
+        >
+          Formation
+        </button>
+        <button
+          (click)="selectedCategory = 'support'; filterStandardists()"
+          [ngClass]="{
+            'bg-gradient-to-r from-red-500 to-red-600 text-white': selectedCategory === 'support',
+            'bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-600': selectedCategory !== 'support'
+          }"
+          class="px-4 py-2 rounded-xl font-medium transition-all duration-200"
+        >
+          Support
+        </button>
+      </div>
+    </div>
+
+    <!-- Services Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div
+        *ngFor="let standardist of filteredStandardists; trackBy: trackByStandardistId"
+        class="card-modern p-6 animate-slide-up group"
+        [style.animation-delay.s]="0.1"
+      >
+        <!-- Service Icon -->
+        <div class="w-16 h-16 rounded-2xl mb-4 flex items-center justify-center group-hover:scale-110 transition-transform"
+             [ngClass]="{
+               'bg-gradient-to-br from-blue-400 to-blue-500': standardist.category === 'testing',
+               'bg-gradient-to-br from-red-400 to-red-500': standardist.category === 'security',
+               'bg-gradient-to-br from-green-400 to-green-500': standardist.category === 'training',
+               'bg-gradient-to-br from-purple-400 to-purple-500': standardist.category === 'support'
+             }">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path *ngIf="standardist.category === 'testing'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            <path *ngIf="standardist.category === 'security'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            <path *ngIf="standardist.category === 'training'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            <path *ngIf="standardist.category === 'support'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+
+        <!-- Service Info -->
+        <div class="mb-4">
+          <h3 class="text-xl font-bold text-gray-800 mb-2">{{standardist.name}}</h3>
+          <p class="text-gray-600 text-sm mb-3">{{standardist.description}}</p>
+          <div class="flex items-center justify-between">
+            <span class="text-2xl font-bold text-gradient">{{standardist.price}} €</span>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                  [ngClass]="{
+                    'bg-blue-100 text-blue-800': standardist.category === 'testing',
+                    'bg-red-100 text-red-800': standardist.category === 'security',
+                    'bg-green-100 text-green-800': standardist.category === 'training',
+                    'bg-purple-100 text-purple-800': standardist.category === 'support'
+                  }">
+              {{standardist.category | titlecase}}
+            </span>
+          </div>
+        </div>
+
+        <!-- Add Button -->
+        <button
+          (click)="addToSelection(standardist)"
+          class="btn-modern btn-primary w-full group-hover:scale-105 transition-transform"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          Ajouter au panier
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selection Tab Content -->
+  <div *ngIf="activeTab === 'selection'" class="animate-fade-in">
+    <div class="card-modern p-6">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+        <svg class="w-6 h-6 mr-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 8M17 21a2 2 0 100-4 2 2 0 000 4zm-8 0a2 2 0 100-4 2 2 0 000 4z"/>
+        </svg>
+        Votre sélection
+      </h2>
+
+      <!-- Empty State -->
+      <div *ngIf="selectedItems.length === 0" class="text-center py-12">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 8M17 21a2 2 0 100-4 2 2 0 000 4zm-8 0a2 2 0 100-4 2 2 0 000 4z"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-800 mb-2">Votre panier est vide</h3>
+        <p class="text-gray-600 mb-4">Ajoutez des services depuis l'onglet Services</p>
+        <button
+          (click)="setActiveTab('products')"
+          class="btn-modern btn-primary"
+        >
+          Parcourir les services
+        </button>
+      </div>
+
+      <!-- Selected Items -->
+      <div *ngIf="selectedItems.length > 0" class="space-y-4">
+        <div
+          *ngFor="let item of selectedItems; trackBy: trackBySelectedItemId"
+          class="bg-gray-50 rounded-2xl p-6 flex items-center justify-between animate-slide-up"
+        >
+          <div class="flex items-center flex-1">
+            <!-- Service Icon -->
+            <div class="w-12 h-12 rounded-xl mr-4 flex items-center justify-center"
+                 [ngClass]="{
+                   'bg-gradient-to-br from-blue-400 to-blue-500': item.standardist.category === 'testing',
+                   'bg-gradient-to-br from-red-400 to-red-500': item.standardist.category === 'security',
+                   'bg-gradient-to-br from-green-400 to-green-500': item.standardist.category === 'training',
+                   'bg-gradient-to-br from-purple-400 to-purple-500': item.standardist.category === 'support'
+                 }">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path *ngIf="item.standardist.category === 'testing'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                <path *ngIf="item.standardist.category === 'security'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                <path *ngIf="item.standardist.category === 'training'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                <path *ngIf="item.standardist.category === 'support'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+
+            <!-- Service Details -->
+            <div class="flex-1">
+              <h4 class="font-bold text-gray-800 mb-1">{{item.standardist.name}}</h4>
+              <p class="text-sm text-gray-600 mb-2">{{item.standardist.description}}</p>
+              <span class="text-lg font-bold text-gradient">{{item.standardist.price}} € / unité</span>
+            </div>
+          </div>
+
+          <!-- Quantity Controls -->
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+              <button
+                (click)="updateQuantity(item.standardist.id, item.quantity - 1)"
+                class="w-8 h-8 rounded-lg bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+              >
+                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                </svg>
+              </button>
+              <span class="w-8 text-center font-semibold">{{item.quantity}}</span>
+              <button
+                (click)="updateQuantity(item.standardist.id, item.quantity + 1)"
+                class="w-8 h-8 rounded-lg bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+              >
+                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Subtotal -->
+            <div class="text-right min-w-24">
+              <p class="text-lg font-bold text-gray-800">{{item.standardist.price * item.quantity}} €</p>
+            </div>
+
+            <!-- Remove Button -->
+            <button
+              (click)="removeFromSelection(item.standardist.id)"
+              class="btn-modern bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Total -->
+        <div class="border-t border-gray-200 pt-4 mt-6">
+          <div class="flex justify-between items-center text-2xl font-bold text-gray-800">
+            <span>Total</span>
+            <span class="text-gradient">{{getTotalPrice()}} €</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Finalization Tab Content -->
+  <div *ngIf="activeTab === 'finalization'" class="animate-fade-in">
+    <div class="card-modern p-8">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+        <svg class="w-6 h-6 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Finalisation de la commande
+      </h2>
+
+      <!-- Customer Information Form -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="space-y-2">
+          <label class="text-sm font-semibold text-gray-700">Nom complet *</label>
+          <input
+            type="text"
+            [(ngModel)]="customerInfo.name"
+            placeholder="Votre nom complet"
+            class="input-modern"
+            required
+          />
+        </div>
+        <div class="space-y-2">
+          <label class="text-sm font-semibold text-gray-700">Email *</label>
+          <input
+            type="email"
+            [(ngModel)]="customerInfo.email"
+            placeholder="votre@email.com"
+            class="input-modern"
+            required
+          />
+        </div>
+        <div class="space-y-2">
+          <label class="text-sm font-semibold text-gray-700">Téléphone</label>
+          <input
+            type="tel"
+            [(ngModel)]="customerInfo.phone"
+            placeholder="+33 1 23 45 67 89"
+            class="input-modern"
+          />
+        </div>
+        <div class="space-y-2">
+          <label class="text-sm font-semibold text-gray-700">Adresse</label>
+          <input
+            type="text"
+            [(ngModel)]="customerInfo.address"
+            placeholder="Votre adresse"
+            class="input-modern"
+          />
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="bg-gray-50 rounded-2xl p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Récapitulatif de la commande</h3>
+        <div class="space-y-3">
+          <div *ngFor="let item of selectedItems" class="flex justify-between items-center">
+            <div>
+              <span class="font-medium">{{item.standardist.name}}</span>
+              <span class="text-gray-500 ml-2">(x{{item.quantity}})</span>
+            </div>
+            <span class="font-semibold">{{item.standardist.price * item.quantity}} €</span>
+          </div>
+          <div class="border-t border-gray-300 pt-3 flex justify-between items-center text-lg font-bold">
+            <span>Total</span>
+            <span class="text-gradient">{{getTotalPrice()}} €</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-end space-x-4">
+        <button
+          (click)="setActiveTab('selection')"
+          class="btn-modern btn-secondary"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          Retour au panier
+        </button>
+        <button
+          (click)="openInvoiceDialog()"
+          class="btn-modern btn-primary px-8"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          Générer la facture
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Invoice Dialog -->
+<div
+  *ngIf="showInvoiceDialog"
+  class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 animate-fade-in"
+  (click)="closeInvoiceDialog()"
+>
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4"
+       (click)="$event.stopPropagation()">
+    <!-- Invoice Header -->
+    <div class="bg-gradient-to-r from-red-500 to-red-600 text-white p-6 rounded-t-2xl">
+      <div class="flex justify-between items-start">
+        <div>
+          <h2 class="text-2xl font-bold mb-2">Facture</h2>
+          <p class="text-red-100">BRAIN Test Platform</p>
+        </div>
+        <button
+          (click)="closeInvoiceDialog()"
+          class="text-white hover:text-red-200 transition-colors"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Invoice Content -->
+    <div class="p-6">
+      <!-- Customer Info -->
+      <div class="mb-6">
+        <h3 class="font-semibold text-gray-800 mb-3">Informations client</h3>
+        <div class="bg-gray-50 rounded-xl p-4">
+          <p><strong>Nom:</strong> {{customerInfo.name}}</p>
+          <p><strong>Email:</strong> {{customerInfo.email}}</p>
+          <p *ngIf="customerInfo.phone"><strong>Téléphone:</strong> {{customerInfo.phone}}</p>
+          <p *ngIf="customerInfo.address"><strong>Adresse:</strong> {{customerInfo.address}}</p>
+        </div>
+      </div>
+
+      <!-- Invoice Items -->
+      <div class="mb-6">
+        <h3 class="font-semibold text-gray-800 mb-3">Services commandés</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="text-left p-3 font-semibold">Service</th>
+                <th class="text-center p-3 font-semibold">Quantité</th>
+                <th class="text-right p-3 font-semibold">Prix unitaire</th>
+                <th class="text-right p-3 font-semibold">Total</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr *ngFor="let item of selectedItems">
+                <td class="p-3">
+                  <div>
+                    <p class="font-medium">{{item.standardist.name}}</p>
+                    <p class="text-sm text-gray-600">{{item.standardist.description}}</p>
+                  </div>
+                </td>
+                <td class="p-3 text-center">{{item.quantity}}</td>
+                <td class="p-3 text-right">{{item.standardist.price}} €</td>
+                <td class="p-3 text-right font-semibold">{{item.standardist.price * item.quantity}} €</td>
+              </tr>
+            </tbody>
+            <tfoot class="bg-gray-50">
+              <tr>
+                <td colspan="3" class="p-3 text-right font-bold">Total général</td>
+                <td class="p-3 text-right text-xl font-bold text-gradient">{{getTotalPrice()}} €</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Invoice Footer -->
+      <div class="bg-blue-50 rounded-xl p-4 mb-6">
+        <p class="text-sm text-blue-800">
+          <strong>Note:</strong> Cette facture sera envoyée à votre adresse email après confirmation.
+          Un représentant vous contactera sous 24h pour finaliser les détails.
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-end space-x-4">
+        <button
+          (click)="closeInvoiceDialog()"
+          class="btn-modern btn-secondary"
+        >
+          Annuler
+        </button>
+        <button
+          (click)="confirmPurchase()"
+          class="btn-modern btn-primary px-8"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Confirmer la commande
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,77 @@
+@startuml Diagramme de Classe - TestSuite
+
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor Lavender
+  BorderColor DarkBlue
+  ArrowColor Black
+}
+
+' ==================================================
+' CLASSE TEST SUITE
+' ==================================================
+
+class TestSuite {
+  ' Attributs
+  - id: UUID {PK}
+  - name: string
+  - selenium_url: string
+  - description: string
+  - created_at: timestamp
+  - updated_at: timestamp
+
+  ' Méthodes
+  + getTestSuite(id: UUID): TestSuite
+  + getAllTestSuites(): TestSuite[]
+  + createTestSuite(data: TestSuiteData): TestSuite
+  + updateTestSuite(id: UUID, updates: TestSuiteData): TestSuite
+  + deleteTestSuite(id: UUID): boolean
+  + getTestSuiteByName(name: string): TestSuite
+  + validateSeleniumUrl(url: string): boolean
+  + countExecutions(): number
+}
+
+' ==================================================
+' NOTES
+' ==================================================
+
+note right of TestSuite
+  **Table: test_suites**
+
+  **Description:**
+  Représente un cahier de tests
+  ou une suite de tests Selenium.
+
+  **Attributs obligatoires:**
+  • name: Nom de la suite de tests
+  • selenium_url: URL de l'application à tester
+
+  **Attributs optionnels:**
+  • description: Description détaillée
+
+  **Relations:**
+  Une suite peut avoir plusieurs
+  exécutions de tests (1..*)
+
+  **Contraintes:**
+  • name doit être unique
+  • selenium_url doit être une URL valide
+end note
+
+' ==================================================
+' LÉGENDE
+' ==================================================
+
+legend bottom left
+  **Conventions:**
+  PK = Primary Key (Clé primaire)
+  UUID = Identifiant unique universel
+
+  **Règles métier:**
+  • Une suite de tests représente un ensemble
+    de scénarios de test pour une application
+  • L'URL Selenium permet de lancer les tests
+    automatiquement
+endlegend
+
+@enduml

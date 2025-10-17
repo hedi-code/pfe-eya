@@ -1,0 +1,181 @@
+@startuml Diagramme de Cas d'Utilisation - Testeur
+
+left to right direction
+skinparam packageStyle rectangle
+
+' ==================================================
+' ACTEUR
+' ==================================================
+
+actor "Testeur" as Tester
+
+' ==================================================
+' SYSTÈME
+' ==================================================
+
+rectangle "Système de Gestion de Tests - Vue Testeur" {
+
+  ' ========== Authentification ==========
+  package "Authentification" {
+    usecase "S'authentifier" as UC_Login
+    usecase "Se déconnecter" as UC_Logout
+    usecase "Maintenir la session" as UC_Session
+  }
+
+  ' ========== Gestion des Suites de Tests ==========
+  package "Gestion des Suites de Tests" {
+    usecase "Créer une suite de tests" as UC_CreateSuite
+    usecase "Nommer la suite" as UC_NameSuite
+    usecase "Définir l'URL Selenium" as UC_SetSeleniumUrl
+    usecase "Ajouter une description" as UC_AddDescription
+    usecase "Consulter les suites" as UC_ViewSuites
+    usecase "Sélectionner une suite" as UC_SelectSuite
+    usecase "Supprimer une suite" as UC_DeleteSuite
+  }
+
+  ' ========== Gestion des Exécutions ==========
+  package "Gestion des Exécutions de Tests" {
+    usecase "Créer une exécution" as UC_CreateExecution
+    usecase "Définir le job Selenium" as UC_SetSeleniumJob
+    usecase "Consulter les exécutions" as UC_ViewExecutions
+    usecase "Filtrer par suite de tests" as UC_FilterBySuite
+    usecase "Voir les détails d'exécution" as UC_ViewExecutionDetails
+    usecase "Supprimer une exécution" as UC_DeleteExecution
+    usecase "Voir les résultats" as UC_ViewResults
+    usecase "Analyser les erreurs" as UC_AnalyzeErrors
+  }
+
+  ' ========== Analyse et Reporting ==========
+  package "Analyse des Tests" {
+    usecase "Consulter le tableau de bord" as UC_Dashboard
+    usecase "Visualiser les statistiques" as UC_ViewStats
+    usecase "Voir la distribution OK/KO" as UC_ViewDistribution
+    usecase "Voir les tests par jour" as UC_ViewDailyTests
+    usecase "Suivre l'évolution" as UC_TrackEvolution
+    usecase "Identifier les tendances" as UC_IdentifyTrends
+  }
+
+  ' ========== Navigation ==========
+  package "Navigation" {
+    usecase "Accéder au dashboard testeur" as UC_TesterDashboard
+    usecase "Accéder à l'analyse" as UC_AccessAnalysis
+    usecase "Basculer entre les vues" as UC_SwitchViews
+  }
+}
+
+' ==================================================
+' RELATIONS PRINCIPALES
+' ==================================================
+
+' --- Authentification ---
+Tester --> UC_Login
+Tester --> UC_Logout
+
+' --- Gestion des Suites de Tests ---
+Tester --> UC_CreateSuite
+Tester --> UC_ViewSuites
+Tester --> UC_SelectSuite
+Tester --> UC_DeleteSuite
+
+' --- Gestion des Exécutions ---
+Tester --> UC_CreateExecution
+Tester --> UC_ViewExecutions
+Tester --> UC_DeleteExecution
+Tester --> UC_ViewResults
+
+' --- Analyse ---
+Tester --> UC_Dashboard
+Tester --> UC_ViewStats
+Tester --> UC_ViewDistribution
+Tester --> UC_ViewDailyTests
+Tester --> UC_TrackEvolution
+
+' --- Navigation ---
+Tester --> UC_TesterDashboard
+Tester --> UC_AccessAnalysis
+Tester --> UC_SwitchViews
+
+' ==================================================
+' RELATIONS ENTRE CAS D'UTILISATION
+' ==================================================
+
+' --- Extensions ---
+UC_Login ..> UC_Session : <<extend>>
+UC_ViewSuites ..> UC_SelectSuite : <<extend>>
+UC_ViewExecutions ..> UC_FilterBySuite : <<extend>>
+UC_ViewExecutions ..> UC_ViewExecutionDetails : <<extend>>
+UC_ViewResults ..> UC_AnalyzeErrors : <<extend>>
+UC_ViewStats ..> UC_IdentifyTrends : <<extend>>
+
+' --- Inclusions ---
+UC_CreateSuite ..> UC_NameSuite : <<include>>
+UC_CreateSuite ..> UC_SetSeleniumUrl : <<include>>
+UC_CreateSuite ..> UC_AddDescription : <<include>>
+
+UC_CreateExecution ..> UC_SetSeleniumJob : <<include>>
+
+UC_SelectSuite ..> UC_ViewExecutions : <<include>>
+
+UC_ViewStats ..> UC_ViewDistribution : <<include>>
+UC_ViewStats ..> UC_ViewDailyTests : <<include>>
+UC_ViewStats ..> UC_TrackEvolution : <<include>>
+
+UC_Dashboard ..> UC_TesterDashboard : <<include>>
+UC_Dashboard ..> UC_AccessAnalysis : <<include>>
+
+' ==================================================
+' NOTES
+' ==================================================
+
+note right of Tester
+  **Rôle: Testeur**
+
+  Responsabilités:
+  - Créer et gérer les suites de tests
+  - Lancer et suivre les exécutions
+  - Analyser les résultats
+  - Identifier les problèmes
+  - Suivre les tendances
+
+  Accès:
+  - Dashboard testeur
+  - Analyse des tests
+  - Pas d'accès à la gestion utilisateurs
+end note
+
+note top of UC_CreateSuite
+  Pour créer une suite de tests:
+  1. Donner un nom
+  2. Fournir l'URL du script Selenium
+  3. Ajouter une description (optionnel)
+end note
+
+note bottom of UC_CreateExecution
+  Une exécution de test nécessite:
+  - Une suite de tests sélectionnée
+  - Un identifiant de job Selenium
+  - Les résultats sont stockés automatiquement
+end note
+
+note top of UC_ViewStats
+  **Analyse visuelle complète:**
+
+  **Graphique Circulaire:**
+  - Distribution Tests OK vs KO
+
+  **Graphique à Barres:**
+  - Tests OK/KO par jour
+
+  **Graphique Linéaire:**
+  - Évolution du nombre de tests
+end note
+
+note bottom of UC_SelectSuite
+  La sélection d'une suite:
+  1. Affiche ses détails
+  2. Charge toutes ses exécutions
+  3. Permet de créer une nouvelle exécution
+  4. Permet de supprimer la suite
+end note
+
+@enduml

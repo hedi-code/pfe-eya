@@ -1,0 +1,42 @@
+@startuml Séquence 2 - Création d'un Cahier de Tests
+
+actor "Testeur" as Tester
+participant "TesterDashboardComponent" as Dashboard
+participant "TestService" as TestSvc
+participant "SupabaseService" as Supabase
+database "Supabase DB" as DB
+
+title Création d'une Cahier de Tests
+
+Tester -> Dashboard : Remplir formulaire nouvelle cahier
+Tester -> Dashboard : Cliquer "Créer cahier"
+activate Dashboard
+
+Dashboard -> TestSvc : createTestcahier(newcahier)
+activate TestSvc
+
+TestSvc -> Supabase : supabase.from('test_cahiers').insert([cahier])
+activate Supabase
+
+Supabase -> DB : INSERT INTO test_cahiers
+activate DB
+DB --> Supabase : cahier créée
+deactivate DB
+
+Supabase --> TestSvc : {error}
+deactivate Supabase
+
+TestSvc --> Dashboard : {error}
+deactivate TestSvc
+
+alt Création réussie
+    Dashboard -> Dashboard : Réinitialiser newcahier
+    Dashboard -> Dashboard : loadcahiers()
+    Dashboard --> Tester : Afficher cahiers mises à jour
+else Erreur
+    Dashboard --> Tester : Afficher message d'erreur
+end
+
+deactivate Dashboard
+
+@enduml

@@ -1,0 +1,124 @@
+@startuml Diagramme de Classe - TestExecution
+
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor LightSalmon
+  BorderColor DarkBlue
+  ArrowColor Black
+}
+
+' ==================================================
+' CLASSE TEST EXECUTION
+' ==================================================
+
+class TestExecution {
+  ' Attributs
+  - id: UUID {PK}
+  - test_suite_id: UUID {FK}
+  - status: string
+  - comments: string
+  - executed_at: timestamp
+  - created_at: timestamp
+  - updated_at: timestamp
+
+  ' Méthodes
+  + getTestExecution(id: UUID): TestExecution
+  + getAllTestExecutions(): TestExecution[]
+  + getExecutionsBySuite(suiteId: UUID): TestExecution[]
+  + createTestExecution(data: TestExecutionData): TestExecution
+  + updateTestExecution(id: UUID, updates: TestExecutionData): TestExecution
+  + deleteTestExecution(id: UUID): boolean
+  + filterByStatus(status: string): TestExecution[]
+  + filterByDate(startDate: Date, endDate: Date): TestExecution[]
+  + getStatsByStatus(): ExecutionStats
+  + validateStatus(status: string): boolean
+}
+
+' ==================================================
+' ÉNUMÉRATIONS
+' ==================================================
+
+enum ExecutionStatus {
+  OK
+  KO
+}
+
+' ==================================================
+' CLASSE AUXILIAIRE
+' ==================================================
+
+class ExecutionStats {
+  - totalExecutions: number
+  - okCount: number
+  - koCount: number
+  - okPercentage: number
+  - koPercentage: number
+
+  + calculateStats(): void
+  + getSuccessRate(): number
+}
+
+' ==================================================
+' RELATIONS
+' ==================================================
+
+TestExecution "1" --> "1" ExecutionStatus : a un statut
+TestExecution "1" ..> "1" ExecutionStats : génère
+
+' ==================================================
+' NOTES
+' ==================================================
+
+note right of TestExecution
+  **Table: test_executions**
+
+  **Description:**
+  Représente une exécution de test
+  pour une suite de tests donnée.
+
+  **Attributs obligatoires:**
+  • test_suite_id: Référence à la suite
+  • status: "OK" ou "KO"
+  • executed_at: Date d'exécution
+
+  **Attributs optionnels:**
+  • comments: Commentaires sur l'exécution
+
+  **Relations:**
+  • Une exécution appartient à une suite (1..1)
+  • Une exécution peut avoir plusieurs
+    résultats détaillés (1..*)
+
+  **Contraintes:**
+  • status doit être "OK" ou "KO"
+  • test_suite_id doit exister dans test_suites
+end note
+
+note top of ExecutionStatus
+  Statuts possibles
+  pour une exécution
+end note
+
+note bottom of ExecutionStats
+  Classe utilitaire pour
+  calculer les statistiques
+  d'exécution
+end note
+
+' ==================================================
+' LÉGENDE
+' ==================================================
+
+legend bottom left
+  **Conventions:**
+  PK = Primary Key (Clé primaire)
+  FK = Foreign Key (Clé étrangère)
+  UUID = Identifiant unique universel
+
+  **Règles métier:**
+  • Chaque exécution est liée à une suite de tests
+  • Le statut OK/KO détermine si le test a réussi
+  • Les commentaires permettent d'ajouter des notes
+endlegend
+
+@enduml

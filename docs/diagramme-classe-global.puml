@@ -1,0 +1,227 @@
+@startuml Diagramme de Classe - Vue Globale du Système
+
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+' ==================================================
+' CLASSE PROFILE
+' ==================================================
+
+class Profile {
+  - id: UUID {PK}
+  - email: string {unique}
+  - full_name: string
+  - role: string
+  - created_at: timestamp
+  - updated_at: timestamp
+
+  + getProfile(id: UUID): Profile
+  + getAllProfiles(): Profile[]
+  + createProfile(data: ProfileData): Profile
+  + updateProfile(id: UUID, updates: ProfileData): Profile
+  + deleteProfile(id: UUID): boolean
+  + getUserRole(userId: UUID): string
+}
+
+' ==================================================
+' CLASSE TEST SUITE
+' ==================================================
+
+class TestSuite {
+  - id: UUID {PK}
+  - name: string
+  - selenium_url: string
+  - description: string
+  - created_at: timestamp
+  - updated_at: timestamp
+
+  + getTestSuite(id: UUID): TestSuite
+  + getAllTestSuites(): TestSuite[]
+  + createTestSuite(data: TestSuiteData): TestSuite
+  + updateTestSuite(id: UUID, updates: TestSuiteData): TestSuite
+  + deleteTestSuite(id: UUID): boolean
+  + countExecutions(): number
+}
+
+' ==================================================
+' CLASSE TEST EXECUTION
+' ==================================================
+
+class TestExecution {
+  - id: UUID {PK}
+  - test_suite_id: UUID {FK}
+  - status: string
+  - comments: string
+  - executed_at: timestamp
+  - created_at: timestamp
+  - updated_at: timestamp
+
+  + getTestExecution(id: UUID): TestExecution
+  + getAllTestExecutions(): TestExecution[]
+  + getExecutionsBySuite(suiteId: UUID): TestExecution[]
+  + createTestExecution(data: TestExecutionData): TestExecution
+  + updateTestExecution(id: UUID, updates: TestExecutionData): TestExecution
+  + deleteTestExecution(id: UUID): boolean
+  + filterByStatus(status: string): TestExecution[]
+  + getStatsByStatus(): ExecutionStats
+}
+
+' ==================================================
+' CLASSE TEST RESULT (Optionnelle)
+' ==================================================
+
+class TestResult {
+  - id: UUID {PK}
+  - execution_id: UUID {FK}
+  - test_name: string
+  - status: string
+  - error_message: string
+  - created_at: timestamp
+
+  + getTestResult(id: UUID): TestResult
+  + getResultsByExecution(executionId: UUID): TestResult[]
+  + createTestResult(data: TestResultData): TestResult
+  + deleteTestResult(id: UUID): boolean
+}
+
+' ==================================================
+' ÉNUMÉRATIONS
+' ==================================================
+
+enum UserRole {
+  ADMIN
+  TESTEUR
+}
+
+enum ExecutionStatus {
+  OK
+  KO
+}
+
+' ==================================================
+' CLASSES DE SERVICE
+' ==================================================
+
+class SupabaseService {
+  - supabase: SupabaseClient
+  - user$: BehaviorSubject<User>
+
+  + signUp(email: string, password: string, role: string): User
+  + signIn(email: string, password: string): User
+  + signOut(): void
+  + getUserRole(userId: UUID): string
+  + getCurrentUser(): User
+}
+
+class TestService {
+  - supabase: SupabaseClient
+  - user$: BehaviorSubject<User>
+
+  ' Profile methods
+  + getProfiles(): Profile[]
+  + createUser(userData: UserData): Profile
+  + deleteProfile(id: UUID): boolean
+
+  ' TestSuite methods
+  + getTestSuites(): TestSuite[]
+  + createTestSuite(suiteData: TestSuiteData): TestSuite
+  + deleteTestSuite(id: UUID): boolean
+
+  ' TestExecution methods
+  + getTestExecutions(): TestExecution[]
+  + createTestExecution(executionData: TestExecutionData): TestExecution
+  + deleteTestExecution(id: UUID): boolean
+
+  ' TestResult methods
+  + getTestResults(): TestResult[]
+  + createTestResult(resultData: TestResultData): TestResult
+}
+
+' ==================================================
+' RELATIONS ENTRE ENTITÉS
+' ==================================================
+
+' Profile - Role
+Profile "1" --> "1" UserRole : a un rôle
+
+' TestSuite - TestExecution
+TestSuite "1" -- "0..*" TestExecution : contient >
+
+' TestExecution - TestResult
+TestExecution "1" -- "0..*" TestResult : génère >
+
+' TestExecution - Status
+TestExecution "1" --> "1" ExecutionStatus : a un statut
+
+' Services - Entités
+SupabaseService ..> Profile : gère l'authentification
+TestService ..> Profile : CRUD
+TestService ..> TestSuite : CRUD
+TestService ..> TestExecution : CRUD
+TestService ..> TestResult : CRUD
+
+' ==================================================
+' NOTES
+' ==================================================
+
+note top of Profile
+  **Table: profiles**
+  Utilisateurs du système
+  (Admin ou Testeur)
+end note
+
+note top of TestSuite
+  **Table: test_suites**
+  Cahiers de tests Selenium
+end note
+
+note top of TestExecution
+  **Table: test_executions**
+  Exécutions de tests
+  avec résultats OK/KO
+end note
+
+note top of TestResult
+  **Table: test_results**
+  Résultats détaillés
+  de chaque test
+end note
+
+note bottom of SupabaseService
+  **Service d'authentification**
+  Gère la connexion et les rôles
+end note
+
+note bottom of TestService
+  **Service métier**
+  Gère toutes les opérations CRUD
+  sur les entités du système
+end note
+
+' ==================================================
+' LÉGENDE
+' ==================================================
+
+legend bottom right
+  **Conventions:**
+  PK = Primary Key (Clé primaire)
+  FK = Foreign Key (Clé étrangère)
+  UUID = Identifiant unique universel
+  CRUD = Create, Read, Update, Delete
+
+  **Cardinalités:**
+  1 = Un
+  0..* = Zéro ou plusieurs
+  1..* = Un ou plusieurs
+
+  **Relations:**
+  — Association
+  ..> Dépendance
+  --> Utilisation
+endlegend
+
+@enduml

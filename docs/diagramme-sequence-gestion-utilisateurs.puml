@@ -1,0 +1,117 @@
+@startuml Diagramme de Séquence - Gestion des Utilisateurs
+
+actor "Administrateur" as Admin
+participant "UsersManagementComponent" as UserMgmt
+participant "TestService" as TestSvc
+participant "SupabaseService" as Supabase
+database "Supabase DB" as DB
+
+title Séquence de Gestion des Utilisateurs
+
+== Initialisation ==
+
+Admin -> UserMgmt : Accéder à la page
+activate UserMgmt
+
+UserMgmt -> UserMgmt : ngOnInit()
+UserMgmt -> UserMgmt : fetchUsers()
+UserMgmt -> UserMgmt : loading = true
+
+UserMgmt -> TestSvc : getProfiles()
+activate TestSvc
+
+TestSvc -> Supabase : supabase.from('profiles').select('*')
+activate Supabase
+
+Supabase -> DB : SELECT * FROM profiles
+activate DB
+DB --> Supabase : Liste des profils
+deactivate DB
+
+Supabase --> TestSvc : {data, error}
+deactivate Supabase
+
+TestSvc --> UserMgmt : {data, error}
+deactivate TestSvc
+
+UserMgmt -> UserMgmt : users = data || []
+UserMgmt -> UserMgmt : loading = false
+UserMgmt --> Admin : Afficher liste des utilisateurs
+deactivate UserMgmt
+
+== Ajout d'un Utilisateur ==
+
+Admin -> UserMgmt : Cliquer "Ajouter un utilisateur"
+activate UserMgmt
+UserMgmt -> UserMgmt : showAddUserModal = true
+UserMgmt --> Admin : Afficher modal
+deactivate UserMgmt
+
+Admin -> UserMgmt : Remplir formulaire (email, password, nom, rôle)
+Admin -> UserMgmt : Cliquer "Créer"
+activate UserMgmt
+
+UserMgmt -> TestSvc : createUser(newUser)
+activate TestSvc
+
+TestSvc -> Supabase : supabase.auth.admin.createUser()
+activate Supabase
+Supabase -> DB : Créer utilisateur auth
+activate DB
+DB --> Supabase : authData.user
+deactivate DB
+Supabase --> TestSvc : {data, error}
+deactivate Supabase
+
+alt Création auth réussie
+    TestSvc -> Supabase : supabase.from('profiles').insert()
+    activate Supabase
+    Supabase -> DB : INSERT INTO profiles
+    activate DB
+    DB --> Supabase : Confirmation
+    deactivate DB
+    Supabase --> TestSvc : {error}
+    deactivate Supabase
+
+    TestSvc --> UserMgmt : {success: true}
+    deactivate TestSvc
+
+    UserMgmt -> UserMgmt : showAddUserModal = false
+    UserMgmt -> UserMgmt : Réinitialiser newUser
+    UserMgmt -> UserMgmt : fetchUsers()
+    UserMgmt --> Admin : Afficher liste mise à jour
+else Erreur lors de la création
+    TestSvc --> UserMgmt : {error}
+    deactivate TestSvc
+    UserMgmt -> UserMgmt : console.error(error)
+    UserMgmt --> Admin : Afficher erreur
+end
+
+deactivate UserMgmt
+
+== Suppression d'un Utilisateur ==
+
+Admin -> UserMgmt : Cliquer "Supprimer" sur un utilisateur
+activate UserMgmt
+
+UserMgmt -> TestSvc : deleteProfile(id)
+activate TestSvc
+
+TestSvc -> Supabase : supabase.from('profiles').delete().eq('id', id)
+activate Supabase
+
+Supabase -> DB : DELETE FROM profiles WHERE id = ?
+activate DB
+DB --> Supabase : Confirmation
+deactivate DB
+
+Supabase --> TestSvc : {error}
+deactivate Supabase
+
+TestSvc --> UserMgmt : {error}
+deactivate TestSvc
+
+UserMgmt --> Admin : Confirmation de suppression
+deactivate UserMgmt
+
+@enduml

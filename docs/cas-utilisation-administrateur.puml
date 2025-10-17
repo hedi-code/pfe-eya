@@ -1,0 +1,194 @@
+@startuml Cas d'Utilisation - Administrateur
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor LightBlue
+  BorderColor DarkBlue
+  ArrowColor Black
+}
+skinparam package {
+  BackgroundColor LightYellow
+  BorderColor DarkGray
+}
+
+' ==================================================
+' ACTEUR
+' ==================================================
+
+actor "Administrateur" as Admin
+
+' ==================================================
+' SYSTÈME
+' ==================================================
+
+rectangle "Système de Gestion de Tests - Administrateur" {
+
+  ' ========== Authentification ==========
+  package "Authentification" #LightCyan {
+    usecase "S'authentifier" as UC_Login
+    usecase "Se déconnecter" as UC_Logout
+    usecase "Récupérer le rôle\nutilisateur" as UC_GetRole
+  }
+
+  ' ========== Gestion des Utilisateurs ==========
+  package "Gestion des Utilisateurs" #LightGreen {
+    usecase "Créer un\nutilisateur" as UC_CreateUser
+    usecase "Afficher la liste\ndes utilisateurs" as UC_ListUsers
+    usecase "Rechercher un\nutilisateur" as UC_SearchUser
+    usecase "Modifier un\nutilisateur" as UC_UpdateUser
+    usecase "Supprimer un\nutilisateur" as UC_DeleteUser
+    usecase "Assigner un rôle\n(admin/testeur)" as UC_AssignRole
+    usecase "Créer le profil\nutilisateur" as UC_CreateProfile
+    usecase "Créer l'authentification\nSupabase" as UC_CreateAuth
+  }
+
+  ' ========== Gestion des Suites de Tests ==========
+  package "Gestion des Suites de Tests" #Lavender {
+    usecase "Créer une suite\nde tests" as UC_CreateSuite
+    usecase "Consulter les\nsuites de tests" as UC_ViewSuites
+    usecase "Sélectionner une\nsuite de tests" as UC_SelectSuite
+    usecase "Modifier une\nsuite de tests" as UC_UpdateSuite
+    usecase "Supprimer une\nsuite de tests" as UC_DeleteSuite
+    usecase "Configurer URL\nSelenium" as UC_ConfigSelenium
+    usecase "Ajouter une\ndescription" as UC_AddDescription
+  }
+
+  ' ========== Gestion des Exécutions ==========
+  package "Gestion des Exécutions de Tests" #LightSalmon {
+    usecase "Créer une\nexécution de test" as UC_CreateExecution
+    usecase "Consulter les\nexécutions" as UC_ViewExecutions
+    usecase "Filtrer par\nsuite de tests" as UC_FilterBySuite
+    usecase "Supprimer une\nexécution" as UC_DeleteExecution
+    usecase "Consulter les\nrésultats" as UC_ViewResults
+    usecase "Analyser les\nerreurs" as UC_AnalyzeErrors
+  }
+
+  ' ========== Analyse et Reporting ==========
+  package "Analyse et Reporting" #PeachPuff {
+    usecase "Consulter le\ntableau de bord" as UC_Dashboard
+    usecase "Visualiser les\nstatistiques" as UC_ViewStats
+    usecase "Voir graphique\ndistribution (Pie)" as UC_PieChart
+    usecase "Voir graphique\nOK/KO journalier (Bar)" as UC_BarChart
+    usecase "Voir évolution\ndes tests (Line)" as UC_LineChart
+    usecase "Exporter les\nrapports" as UC_ExportReports
+  }
+
+  ' ========== Navigation ==========
+  package "Navigation" #LightGray {
+    usecase "Accéder au\ndashboard testeur" as UC_TesterDashboard
+    usecase "Accéder à la\ngestion utilisateurs" as UC_UserManagement
+    usecase "Accéder à\nl'analyse" as UC_AccessAnalysis
+  }
+}
+
+' ==================================================
+' RELATIONS PRINCIPALES
+' ==================================================
+
+' --- Authentification ---
+Admin -down-> UC_Login
+Admin -down-> UC_Logout
+
+' --- Gestion des Utilisateurs ---
+Admin -down-> UC_CreateUser
+Admin -down-> UC_ListUsers
+Admin -down-> UC_SearchUser
+Admin -down-> UC_UpdateUser
+Admin -down-> UC_DeleteUser
+
+' --- Gestion des Suites de Tests ---
+Admin -down-> UC_CreateSuite
+Admin -down-> UC_ViewSuites
+Admin -down-> UC_UpdateSuite
+Admin -down-> UC_DeleteSuite
+
+' --- Gestion des Exécutions ---
+Admin -down-> UC_CreateExecution
+Admin -down-> UC_ViewExecutions
+Admin -down-> UC_DeleteExecution
+Admin -down-> UC_ViewResults
+
+' --- Analyse et Reporting ---
+Admin -down-> UC_Dashboard
+Admin -down-> UC_ViewStats
+Admin -down-> UC_ExportReports
+
+' --- Navigation ---
+Admin -down-> UC_TesterDashboard
+Admin -down-> UC_UserManagement
+Admin -down-> UC_AccessAnalysis
+
+' ==================================================
+' RELATIONS ENTRE CAS D'UTILISATION
+' ==================================================
+
+' --- Extensions ---
+UC_Login .right.> UC_GetRole : <<extend>>
+UC_ViewSuites .down.> UC_SelectSuite : <<extend>>
+UC_ViewExecutions .down.> UC_FilterBySuite : <<extend>>
+UC_ViewResults .right.> UC_AnalyzeErrors : <<extend>>
+
+' --- Inclusions ---
+UC_CreateUser .down.> UC_CreateAuth : <<include>>
+UC_CreateUser .down.> UC_CreateProfile : <<include>>
+UC_CreateUser .right.> UC_AssignRole : <<include>>
+
+UC_CreateSuite .down.> UC_ConfigSelenium : <<include>>
+UC_CreateSuite .down.> UC_AddDescription : <<include>>
+
+UC_ViewStats .down.> UC_PieChart : <<include>>
+UC_ViewStats .down.> UC_BarChart : <<include>>
+UC_ViewStats .down.> UC_LineChart : <<include>>
+
+UC_Dashboard .down.> UC_TesterDashboard : <<include>>
+UC_Dashboard .down.> UC_UserManagement : <<include>>
+UC_Dashboard .down.> UC_AccessAnalysis : <<include>>
+
+' ==================================================
+' NOTES ET LÉGENDES
+' ==================================================
+
+note right of Admin
+  **Rôle : Administrateur**
+
+  **Responsabilités :**
+  • Gérer tous les utilisateurs
+  • Assigner les rôles
+  • Accéder à toutes les fonctionnalités
+  • Superviser les tests
+  • Analyser les résultats globaux
+end note
+
+note top of UC_CreateUser
+  **Processus de création :**
+  1. Créer l'authentification Supabase
+  2. Créer le profil (table profiles)
+  3. Assigner le rôle (admin/testeur)
+end note
+
+note bottom of UC_ViewStats
+  **Types de visualisations :**
+  • Distribution (Pie Chart)
+  • OK/KO par jour (Bar Chart)
+  • Évolution temporelle (Line Chart)
+end note
+
+note right of UC_Dashboard
+  **Dashboard administrateur**
+  Point d'accès central vers :
+  • Gestion utilisateurs
+  • Dashboard testeur
+  • Analyse des tests
+end note
+
+legend right
+  |<#LightCyan> Authentification |
+  |<#LightGreen> Gestion Utilisateurs |
+  |<#Lavender> Gestion Suites Tests |
+  |<#LightSalmon> Gestion Exécutions |
+  |<#PeachPuff> Analyse & Reporting |
+  |<#LightGray> Navigation |
+endlegend
+
+@enduml

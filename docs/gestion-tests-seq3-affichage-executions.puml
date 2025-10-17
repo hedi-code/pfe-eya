@@ -1,0 +1,40 @@
+@startuml Séquence 3 - Sélection et Affichage des Exécutions de Tests
+
+actor "Testeur" as Tester
+participant "TesterDashboardComponent" as Dashboard
+participant "TestService" as TestSvc
+participant "SupabaseService" as Supabase
+database "Supabase DB" as DB
+
+title Sélection et Affichage des Exécutions de Tests
+
+Tester -> Dashboard : Cliquer sur une cahier de tests
+activate Dashboard
+
+Dashboard -> Dashboard : selectcahier(id)
+Dashboard -> Dashboard : selectedcahierId = id
+Dashboard -> Dashboard : selectedcahier = cahier trouvée
+Dashboard -> Dashboard : loadTestsForcahier(id)
+
+Dashboard -> TestSvc : supabase.from('test_executions').select('*').eq('test_cahier_id', cahierId)
+activate TestSvc
+
+TestSvc -> Supabase : Query test_executions
+activate Supabase
+
+Supabase -> DB : SELECT * FROM test_executions WHERE test_cahier_id = ?
+activate DB
+DB --> Supabase : Liste des exécutions
+deactivate DB
+
+Supabase --> TestSvc : {data, error}
+deactivate Supabase
+
+TestSvc --> Dashboard : {data, error}
+deactivate TestSvc
+
+Dashboard -> Dashboard : testExecutions = data || []
+Dashboard --> Tester : Afficher exécutions de tests
+deactivate Dashboard
+
+@enduml

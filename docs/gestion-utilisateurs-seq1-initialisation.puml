@@ -1,0 +1,40 @@
+@startuml Séquence 1 - Initialisation et Chargement des Utilisateurs
+
+actor "Administrateur" as Admin
+participant "UsersManagementComponent" as UserMgmt
+participant "TestService" as TestSvc
+participant "SupabaseService" as Supabase
+database "Supabase DB" as DB
+
+title Initialisation et Chargement des Utilisateurs
+
+Admin -> UserMgmt : Accéder à la page
+activate UserMgmt
+
+UserMgmt -> UserMgmt : ngOnInit()
+UserMgmt -> UserMgmt : fetchUsers()
+UserMgmt -> UserMgmt : loading = true
+
+UserMgmt -> TestSvc : getProfiles()
+activate TestSvc
+
+TestSvc -> Supabase : supabase.from('profiles').select('*')
+activate Supabase
+
+Supabase -> DB : SELECT * FROM profiles
+activate DB
+DB --> Supabase : Liste des profils
+deactivate DB
+
+Supabase --> TestSvc : {data, error}
+deactivate Supabase
+
+TestSvc --> UserMgmt : {data, error}
+deactivate TestSvc
+
+UserMgmt -> UserMgmt : users = data || []
+UserMgmt -> UserMgmt : loading = false
+UserMgmt --> Admin : Afficher liste des utilisateurs
+deactivate UserMgmt
+
+@enduml

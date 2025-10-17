@@ -1,0 +1,51 @@
+@startuml Séquence 8 - Modification d'une Exécution de Test
+
+actor "Testeur" as Tester
+participant "TesterDashboardComponent" as Dashboard
+participant "TestService" as TestSvc
+participant "SupabaseService" as Supabase
+database "Supabase DB" as DB
+
+title Modification d'une Exécution de Test
+
+Tester -> Dashboard : Cliquer "Modifier" sur une exécution
+activate Dashboard
+
+Dashboard -> Dashboard : Charger les données de l'exécution
+Dashboard -> Dashboard : Remplir le formulaire avec données existantes
+Dashboard --> Tester : Afficher formulaire de modification
+deactivate Dashboard
+
+Tester -> Dashboard : Modifier les champs (statut, commentaires)
+Tester -> Dashboard : Cliquer "Enregistrer les modifications"
+activate Dashboard
+
+Dashboard -> Dashboard : Valider les données
+Dashboard -> TestSvc : updateTestExecution(id, updatedData)
+activate TestSvc
+
+TestSvc -> Supabase : supabase.from('test_executions').update(updates).eq('id', id)
+activate Supabase
+
+Supabase -> DB : UPDATE test_executions SET ... WHERE id = ?
+activate DB
+DB --> Supabase : Exécution mise à jour
+deactivate DB
+
+Supabase --> TestSvc : {error}
+deactivate Supabase
+
+TestSvc --> Dashboard : {error}
+deactivate TestSvc
+
+alt Modification réussie
+    Dashboard -> Dashboard : loadTestsForSuite(selectedSuiteId)
+    Dashboard --> Tester : Afficher exécutions mises à jour
+    Dashboard --> Tester : Message de confirmation
+else Erreur
+    Dashboard --> Tester : Afficher message d'erreur
+end
+
+deactivate Dashboard
+
+@enduml

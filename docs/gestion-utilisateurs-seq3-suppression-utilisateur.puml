@@ -1,0 +1,34 @@
+@startuml Séquence 3 - Suppression d'un Utilisateur
+
+actor "Administrateur" as Admin
+participant "UsersManagementComponent" as UserMgmt
+participant "TestService" as TestSvc
+participant "SupabaseService" as Supabase
+database "Supabase DB" as DB
+
+title Suppression d'un Utilisateur
+
+Admin -> UserMgmt : Cliquer "Supprimer" sur un utilisateur
+activate UserMgmt
+
+UserMgmt -> TestSvc : deleteProfile(id)
+activate TestSvc
+
+TestSvc -> Supabase : supabase.from('profiles').delete().eq('id', id)
+activate Supabase
+
+Supabase -> DB : DELETE FROM profiles WHERE id = ?
+activate DB
+DB --> Supabase : Confirmation
+deactivate DB
+
+Supabase --> TestSvc : {error}
+deactivate Supabase
+
+TestSvc --> UserMgmt : {error}
+deactivate TestSvc
+
+UserMgmt --> Admin : Confirmation de suppression
+deactivate UserMgmt
+
+@enduml

@@ -1,0 +1,98 @@
+<div class="p-6 bg-gray-100 min-h-screen">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">User Management</h1>
+    <button
+      class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+      (click)="showAddUserModal = true">
+      + Add User
+    </button>
+  </div>
+
+  <!-- Users Table -->
+  <div class="overflow-x-auto bg-white shadow rounded-lg">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase">Nom complet</th>
+          <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase">Email</th>
+          <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase">Role</th>
+          <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase">Created</th>
+          <th class="px-6 py-3 text-right text-sm font-medium text-gray-500 uppercase">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200" *ngIf="!loading">
+        <tr *ngFor="let user of users">
+          <td class="px-6 py-4 whitespace-nowrap">{{ user.full_name || '-' }}</td>
+          <td class="px-6 py-4 whitespace-nowrap">{{ user.email }}</td>
+          <td class="px-6 py-4 whitespace-nowrap capitalize">{{ user.role }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ user.created_at | date: 'mediumDate' }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right">
+            <button
+              (click)="deleteUser(user.id)"
+              class="text-red-600 hover:text-red-800 font-medium"
+            >
+              Delete
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="loading" class="p-4 text-center text-gray-500">Loading users...</div>
+    <div *ngIf="!loading && users.length === 0" class="p-4 text-center text-gray-500">Pas de profiles.</div>
+  </div>
+
+  <!-- Add User Modal -->
+  <div
+    *ngIf="showAddUserModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+  >
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
+      <button class="absolute top-3 right-3 text-gray-600 hover:text-black" (click)="showAddUserModal = false">✕</button>
+      <h2 class="text-xl font-bold mb-4">Créer un nouveau profile</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input
+          type="email"
+          [(ngModel)]="newUser.email"
+          placeholder="Email"
+          class="border px-4 py-2 rounded w-full"
+        />
+        <input
+          type="password"
+          [(ngModel)]="newUser.password"
+          placeholder="Password"
+          class="border px-4 py-2 rounded w-full"
+        />
+        <input
+          type="text"
+          [(ngModel)]="newUser.full_name"
+          placeholder="Full Name"
+          class="border px-4 py-2 rounded w-full"
+        />
+        <select [(ngModel)]="newUser.role" class="border px-4 py-2 rounded w-full">
+          <option value="tester">Tester</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <button
+          class="bg-gray-300 text-gray-800 px-4 py-2 rounded mr-2"
+          (click)="showAddUserModal = false"
+        >
+          Annuler
+        </button>
+        <button
+          class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          (click)="addUser()"
+        >
+          Créer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

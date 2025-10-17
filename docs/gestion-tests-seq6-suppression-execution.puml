@@ -1,0 +1,35 @@
+@startuml Séquence 6 - Suppression d'une Exécution de Test
+
+actor "Testeur" as Tester
+participant "TesterDashboardComponent" as Dashboard
+participant "TestService" as TestSvc
+participant "SupabaseService" as Supabase
+database "Supabase DB" as DB
+
+title Suppression d'une Exécution de Test
+
+Tester -> Dashboard : Cliquer "Supprimer" sur une exécution
+activate Dashboard
+
+Dashboard -> TestSvc : deleteTestExecution(id)
+activate TestSvc
+
+TestSvc -> Supabase : supabase.from('test_executions').delete().eq('id', id)
+activate Supabase
+
+Supabase -> DB : DELETE FROM test_executions WHERE id = ?
+activate DB
+DB --> Supabase : Confirmation
+deactivate DB
+
+Supabase --> TestSvc : Résultat
+deactivate Supabase
+
+TestSvc --> Dashboard : Résultat
+deactivate TestSvc
+
+Dashboard -> Dashboard : loadTestsForcahier(selectedcahierId)
+Dashboard --> Tester : Afficher exécutions mises à jour
+deactivate Dashboard
+
+@enduml
