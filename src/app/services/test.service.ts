@@ -120,4 +120,81 @@ async createUser(user: { email: string, password: string, full_name: string, rol
   async deleteTestResult(id: string) {
     return this.supabase.from('test_results').delete().eq('id', id);
   }
+
+  // ---------- Test Assignments ----------
+  async getTestAssignments() {
+    return this.supabase
+      .from('test_assignments')
+      .select(`
+        *,
+        test_suite:test_suites(*),
+        tester:profiles!test_assignments_tester_id_fkey(id, email, full_name),
+        assigner:profiles!test_assignments_assigned_by_fkey(id, email, full_name)
+      `)
+      .order('assigned_at', { ascending: false });
+  }
+
+  async getAssignmentsByTesterId(testerId: string) {
+    return this.supabase
+      .from('test_assignments')
+      .select(`
+        *,
+        test_suite:test_suites(*)
+      `)
+      .eq('tester_id', testerId)
+      .order('assigned_at', { ascending: false });
+  }
+
+  async getAssignmentsByTestSuiteId(testSuiteId: string) {
+    return this.supabase
+      .from('test_assignments')
+      .select(`
+        *,
+        tester:profiles!test_assignments_tester_id_fkey(id, email, full_name)
+      `)
+      .eq('test_suite_id', testSuiteId);
+  }
+
+  async assignTestToTester(assignment: {
+    test_suite_id: string;
+    tester_id: string;
+    assigned_by: string;
+    due_date?: string;
+    notes?: string;
+  }) {
+    return this.supabase.from('test_assignments').insert([{
+      test_suite_id: assignment.test_suite_id,
+      tester_id: assignment.tester_id,
+      assigned_by: assignment.assigned_by,
+      due_date: assignment.due_date,
+      notes: assignment.notes,
+      status: 'assigned'
+    }]);
+  }
+
+  async updateAssignmentStatus(id: string, status: string) {
+    return this.supabase
+      .from('test_assignments')
+      .update({ status })
+      .eq('id', id);
+  }
+
+  async updateAssignment(id: string, updates: any) {
+    return this.supabase
+      .from('test_assignments')
+      .update(updates)
+      .eq('id', id);
+  }
+
+  async deleteAssignment(id: string) {
+    return this.supabase.from('test_assignments').delete().eq('id', id);
+  }
+
+  async getTestersByRole() {
+    return this.supabase
+      .from('profiles')
+      .select('id, email, full_name, role')
+      .eq('role', 'tester')
+      .order('full_name');
+  }
 }
