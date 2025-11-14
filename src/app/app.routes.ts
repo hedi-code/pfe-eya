@@ -7,6 +7,7 @@ import { UsersManagementComponent } from './components/users-management/users-ma
 import { TestAnalysisComponent } from './components/test-analysis/test-analysis.component';
 import { ChatbotComponent } from './components/chatbot/chatbot.component';
 import { TestAssignmentComponent } from './components/test-assignment/test-assignment.component';
+import { JenkinsComponent } from './components/jenkins/jenkins.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -16,7 +17,8 @@ export const routes: Routes = [
     {path:'users', component: UsersManagementComponent},
     {path:'analyse', component: TestAnalysisComponent},
     {path:'chatbot', component: ChatbotComponent},
-    {path:'assign-tests', component: TestAssignmentComponent}
+    {path:'assign-tests', component: TestAssignmentComponent},
+    {path:'jenkins', component: JenkinsComponent}
   ]
   },
   // { path: '**', redirectTo: 'login' },
