@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TestService } from '../../services/test.service';
 import { SupabaseService } from '../../services/supabase.service';
+import { ToastrService } from 'ngx-toastr';
 
 interface TestSuite {
   id: string;
@@ -62,7 +63,8 @@ export class TestAssignmentComponent implements OnInit {
 
   constructor(
     private testService: TestService,
-    private supabaseService: SupabaseService
+    private supabaseService: SupabaseService,
+    private toastr: ToastrService
   ) {}
 
   async ngOnInit() {
@@ -132,7 +134,7 @@ export class TestAssignmentComponent implements OnInit {
 
   async assignTest() {
     if (!this.selectedTestSuite || !this.selectedTesterId) {
-      alert('Veuillez sélectionner un testeur');
+      this.toastr.warning('Veuillez sélectionner un testeur.', 'Attention');
       return;
     }
 
@@ -144,7 +146,7 @@ export class TestAssignmentComponent implements OnInit {
     );
 
     if (existingAssignment) {
-      alert('Ce test est déjà assigné à ce testeur');
+      this.toastr.warning('Ce test est déjà assigné à ce testeur.', 'Attention');
       return;
     }
 
@@ -162,8 +164,9 @@ export class TestAssignmentComponent implements OnInit {
 
     if (error) {
       console.error('Error assigning test:', error);
-      alert('Erreur lors de l\'assignation du test');
+      this.toastr.error('Erreur lors de l\'assignation du test.', 'Erreur');
     } else {
+      this.toastr.success('Le test a été assigné avec succès au testeur.', 'Succès');
       await this.loadAssignments();
       this.closeAssignModal();
     }
@@ -180,8 +183,9 @@ export class TestAssignmentComponent implements OnInit {
 
     if (error) {
       console.error('Error deleting assignment:', error);
-      alert('Erreur lors de la suppression de l\'assignation');
+      this.toastr.error('Erreur lors de la suppression de l\'assignation.', 'Erreur');
     } else {
+      this.toastr.success('L\'assignation a été supprimée avec succès.', 'Succès');
       await this.loadAssignments();
     }
   }
@@ -191,8 +195,9 @@ export class TestAssignmentComponent implements OnInit {
 
     if (error) {
       console.error('Error updating status:', error);
-      alert('Erreur lors de la mise à jour du statut');
+      this.toastr.error('Erreur lors de la mise à jour du statut.', 'Erreur');
     } else {
+      this.toastr.success('Le statut a été mis à jour avec succès.', 'Succès');
       await this.loadAssignments();
     }
   }

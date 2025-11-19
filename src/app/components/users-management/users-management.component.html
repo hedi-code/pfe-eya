@@ -29,12 +29,18 @@
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
             {{ user.created_at | date: 'mediumDate' }}
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-right">
+          <td class="px-6 py-4 whitespace-nowrap text-right space-x-2">
+            <button
+              (click)="openEditModal(user)"
+              class="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Modifier
+            </button>
             <button
               (click)="deleteUser(user.id)"
               class="text-red-600 hover:text-red-800 font-medium"
             >
-              Delete
+              Supprimer
             </button>
           </td>
         </tr>
@@ -91,6 +97,51 @@
           (click)="addUser()"
         >
           Créer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit User Modal -->
+  <div
+    *ngIf="showEditUserModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+  >
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
+      <button class="absolute top-3 right-3 text-gray-600 hover:text-black" (click)="showEditUserModal = false">✕</button>
+      <h2 class="text-xl font-bold mb-4">Modifier l'utilisateur</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input
+          type="email"
+          [(ngModel)]="editUser.email"
+          placeholder="Email"
+          class="border px-4 py-2 rounded w-full"
+        />
+        <input
+          type="text"
+          [(ngModel)]="editUser.full_name"
+          placeholder="Nom complet"
+          class="border px-4 py-2 rounded w-full"
+        />
+        <select [(ngModel)]="editUser.role" class="border px-4 py-2 rounded w-full">
+          <option value="tester">Tester</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <button
+          class="bg-gray-300 text-gray-800 px-4 py-2 rounded mr-2"
+          (click)="showEditUserModal = false"
+        >
+          Annuler
+        </button>
+        <button
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          (click)="updateUser()"
+        >
+          Modifier
         </button>
       </div>
     </div>

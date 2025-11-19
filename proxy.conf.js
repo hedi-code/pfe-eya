@@ -22,6 +22,26 @@ const PROXY_CONFIG = [
     onError: (err, req, res) => {
       console.error('Proxy error:', err);
     }
+  },
+  {
+    context: ['/api/chatbot'],
+    target: 'https://eyaelouni.app.n8n.cloud',
+    secure: true,
+    logLevel: 'debug',
+    changeOrigin: true,
+    pathRewrite: {
+      '^/api/chatbot': '/webhook-test/brain-chat'
+    },
+    onProxyReq: (proxyReq, req, res) => {
+      console.log('Proxying chatbot request to:', proxyReq.path);
+    },
+    onProxyRes: (proxyRes, req, res) => {
+      console.log('Chatbot proxy response status:', proxyRes.statusCode);
+      console.log('Chatbot proxy response headers:', proxyRes.headers);
+    },
+    onError: (err, req, res) => {
+      console.error('Chatbot proxy error:', err);
+    }
   }
 ];
 
