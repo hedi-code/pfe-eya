@@ -20,6 +20,9 @@ export class JenkinsComponent implements OnInit {
   error: string | null = null;
   showCredentialsForm = false;
   showBuildDialog = false;
+  showToast = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' = 'success';
 
   credentials: JenkinsCredentials = {
     username: '',
@@ -68,12 +71,35 @@ export class JenkinsComponent implements OnInit {
       next: (job) => {
         this.jobInfo = job;
         this.loadBuilds();
+        this.showToastMessage('Connexion réussie à Jenkins', 'success');
       },
       error: (err) => {
         this.error = this.getErrorMessage(err);
         this.loading = false;
+
+        // Show toast for authentication errors
+        if (err.status === 401 || err.status === 403) {
+          this.showToastMessage('Identifiants incorrects. Veuillez vérifier votre nom d\'utilisateur et token.', 'error');
+        } else {
+          this.showToastMessage('Erreur de connexion à Jenkins', 'error');
+        }
       }
     });
+  }
+
+  showToastMessage(message: string, type: 'success' | 'error'): void {
+    this.toastMessage = message;
+    this.toastType = type;
+    this.showToast = true;
+
+    // Auto-hide toast after 4 seconds
+    setTimeout(() => {
+      this.showToast = false;
+    }, 4000);
+  }
+
+  closeToast(): void {
+    this.showToast = false;
   }
 
   loadBuilds(): void {
@@ -167,6 +193,7 @@ export class JenkinsComponent implements OnInit {
     this.jenkinsService.triggerBuild(this.buildParameters).subscribe({
       next: () => {
         this.closeBuildDialog();
+        this.showToastMessage('Build lancé avec succès', 'success');
         setTimeout(() => {
           this.loadJobInfo();
         }, 2000);
@@ -174,6 +201,7 @@ export class JenkinsComponent implements OnInit {
       error: (err) => {
         this.error = this.getErrorMessage(err);
         this.loading = false;
+        this.showToastMessage('Erreur lors du lancement du build', 'error');
       }
     });
   }

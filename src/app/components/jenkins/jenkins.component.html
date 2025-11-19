@@ -67,7 +67,7 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Jenkins - Brain Tests</h1>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Lancer cas de test</h1>
         <p class="text-gray-600" *ngIf="jobInfo">{{ jobInfo.description || 'Test automation jobs' }}</p>
       </div>
       <div class="flex space-x-3">
@@ -274,6 +274,30 @@
           Lancer
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div *ngIf="showToast"
+       [class]="'fixed top-4 right-4 z-50 max-w-md p-4 rounded-lg shadow-2xl toast-enter ' +
+                (toastType === 'success' ? 'bg-green-500' : 'bg-red-500')">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <!-- Success Icon -->
+        <svg *ngIf="toastType === 'success'" class="w-6 h-6 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <!-- Error Icon -->
+        <svg *ngIf="toastType === 'error'" class="w-6 h-6 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="text-white font-semibold">{{ toastMessage }}</p>
+      </div>
+      <button (click)="closeToast()" class="ml-4 text-white hover:text-gray-200 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
   </div>
 </div>
