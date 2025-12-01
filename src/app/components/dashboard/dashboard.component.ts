@@ -16,7 +16,6 @@ import { TesterDashboardComponent } from './tester-dashboard/tester-dashboard.co
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent {
-  role: string | null = "admin";
   user$ = new BehaviorSubject<User | null>(null);
 
   constructor(private supabase: SupabaseService, private router: Router) {
@@ -24,7 +23,7 @@ export class DashboardComponent {
   }
 
   ngOnInit(): void {
-        this.user$ = this.supabase.user$;
+    this.user$ = this.supabase.user$;
   }
 
   logout() {

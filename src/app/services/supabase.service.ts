@@ -15,12 +15,43 @@ signingIn = false;
       'https://aogtreiqhhyjrzsltadg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvZ3RyZWlxaGh5anJ6c2x0YWRnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NTE3NjYzNywiZXhwIjoyMDcwNzUyNjM3fQ.qkhBPfWFQ0khKaDqxez5FDFbLS9zoSzJxVO6gKxPLzk'
     );
- // Initialize current user
 
-    // Listen to auth changes safely
-    this.supabase.auth.onAuthStateChange((_event, session) => {
-      this.user$.next(session?.user ?? null);
+    // Initialize current user with role
+    this.initializeUser();
+
+    // Listen to auth changes and fetch role
+    this.supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        await this.fetchAndSetUserRole(session.user);
+      } else {
+        this.user$.next(null);
+      }
     });
+  }
+
+  private async initializeUser() {
+    const { data: { session } } = await this.supabase.auth.getSession();
+    if (session?.user) {
+      await this.fetchAndSetUserRole(session.user);
+    }
+  }
+
+  private async fetchAndSetUserRole(user: User) {
+    try {
+      const { data, error } = await this.supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (!error && data?.role) {
+        (user as any).role = data.role;
+      }
+      this.user$.next(user);
+    } catch (err) {
+      console.error('Error fetching user role:', err);
+      this.user$.next(user);
+    }
   }
 
 
@@ -55,21 +86,10 @@ async signIn(email: string, password: string) {
     const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
 
-    const profile = await this.supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', data.session?.user.id)
-      .single();
-
-    if (profile && profile.data?.role) {
-      const role = profile.data?.role;
-      data.user.role = role;
-this.user$.next({ ...data.user } as any); // optional cast
+    // Fetch and set user role
+    if (data.user) {
+      await this.fetchAndSetUserRole(data.user);
     }
-else{
-
-  this.user$.next(data.user ?? null);
-}
 
     return {
       user: data.user ?? null,
