@@ -18,13 +18,13 @@ export class ChatbotService {
   public messages$: Observable<Message[]> = this.messagesSubject.asObservable();
 
   private messageIdCounter = 1;
-  private apiUrl = 'https://eyaelouni.app.n8n.cloud/webhook-test/brain-chat'; // Proxied to n8n webhook
+  private apiUrl = 'https://eyaelouni.app.n8n.cloud/webhook/brain-chat'; // Proxied to n8n webhook
 
   constructor() {
     // Initialize with welcome message
     this.addMessage({
       id: this.messageIdCounter++,
-      content: 'Hello! I\'m your QA Assistant. I can help answer questions about quality assurance, testing methodologies, and best practices. How can I help you today?',
+      content: 'Bonjour ! Je suis votre assistant QA. Je peux vous aider à répondre aux questions concernant l’assurance qualité, les méthodologies de test et les meilleures pratiques. Comment puis-je vous aider aujourd’hui ?',
       sender: 'bot',
       timestamp: new Date()
     });
@@ -68,8 +68,7 @@ export class ChatbotService {
       // Call n8n API
       const response: any = await firstValueFrom(
         this.http.post(this.apiUrl, {
-          message: content,
-          chatId: 'chatbot-session-' + Date.now()
+          question: content
         }, {
           headers: {
             'Content-Type': 'application/json'
@@ -82,11 +81,11 @@ export class ChatbotService {
       // Extract response from API
       let botResponse: string;
 
-      // Adapt to different possible response formats
-      if (typeof response === 'string') {
-        botResponse = response;
-      } else if (response?.output) {
+      // Extract from output field (main expected format)
+      if (response?.output) {
         botResponse = response.output;
+      } else if (typeof response === 'string') {
+        botResponse = response;
       } else if (response?.message) {
         botResponse = response.message;
       } else if (response?.response) {
