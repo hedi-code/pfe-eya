@@ -1,26 +1,36 @@
 // Status badges
 .badge {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 .badge-assigned {
-  @apply bg-blue-100 text-blue-800;
+  background-color: rgb(219, 234, 254);
+  color: rgb(30, 64, 175);
 }
 
 .badge-progress {
-  @apply bg-yellow-100 text-yellow-800;
+  background-color: rgb(254, 243, 199);
+  color: rgb(161, 98, 7);
 }
 
 .badge-completed {
-  @apply bg-green-100 text-green-800;
+  background-color: rgb(220, 252, 231);
+  color: rgb(6, 78, 59);
 }
 
 .badge-cancelled {
-  @apply bg-gray-100 text-gray-800;
+  background-color: rgb(243, 244, 246);
+  color: rgb(55, 65, 81);
 }
 
 .badge-default {
-  @apply bg-gray-100 text-gray-600;
+  background-color: rgb(243, 244, 246);
+  color: rgb(75, 85, 99);
 }
 
 // Animation for modal

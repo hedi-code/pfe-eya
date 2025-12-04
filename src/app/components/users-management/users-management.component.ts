@@ -36,15 +36,24 @@ users: any[] = [];
     private toastr: ToastrService
   ) {}
 
-  async ngOnInit() {
-    await this.fetchUsers();
+  ngOnInit() {
+    this.fetchUsers();
   }
 
   async fetchUsers() {
-    this.loading = true;
-    const { data, error } = await this.testService.getProfiles();
-    this.users = data || [];
-    this.loading = false;
+    try {
+      this.loading = true;
+      const { data, error } = await this.testService.getProfiles();
+      if (error) {
+        console.error('Error fetching users:', error);
+        this.toastr.error('Erreur lors du chargement des utilisateurs.', 'Erreur');
+        this.users = [];
+      } else {
+        this.users = data || [];
+      }
+    } finally {
+      this.loading = false;
+    }
   }
 
   async addUser() {

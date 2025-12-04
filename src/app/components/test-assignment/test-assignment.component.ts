@@ -73,20 +73,36 @@ export class TestAssignmentComponent implements OnInit {
   }
 
   async getCurrentUser() {
-    const { data: { user } } = await this.supabaseService.supabase.auth.getUser();
-    if (user) {
-      this.currentUserId = user.id;
+    try {
+      const { data: { user } } = await this.supabaseService.supabase.auth.getUser();
+      if (user) {
+        this.currentUserId = user.id;
+      }
+    } catch (error) {
+      console.error('Error getting current user:', error);
     }
   }
 
   async loadData() {
     this.isLoading = true;
-    await Promise.all([
-      this.loadTestSuites(),
-      this.loadTesters(),
-      this.loadAssignments()
-    ]);
-    this.isLoading = false;
+    try {
+      await Promise.all([
+        this.loadTestSuites().catch(err => {
+          console.error('Failed to load test suites:', err);
+          this.testSuites = [];
+        }),
+        this.loadTesters().catch(err => {
+          console.error('Failed to load testers:', err);
+          this.testers = [];
+        }),
+        this.loadAssignments().catch(err => {
+          console.error('Failed to load assignments:', err);
+          this.assignments = [];
+        })
+      ]);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   async loadTestSuites() {
@@ -95,6 +111,7 @@ export class TestAssignmentComponent implements OnInit {
       this.testSuites = data;
     } else {
       console.error('Error loading test suites:', error);
+      this.testSuites = [];
     }
   }
 
@@ -104,6 +121,7 @@ export class TestAssignmentComponent implements OnInit {
       this.testers = data;
     } else {
       console.error('Error loading testers:', error);
+      this.testers = [];
     }
   }
 
@@ -113,6 +131,7 @@ export class TestAssignmentComponent implements OnInit {
       this.assignments = data;
     } else {
       console.error('Error loading assignments:', error);
+      this.assignments = [];
     }
   }
 

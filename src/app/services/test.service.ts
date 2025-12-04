@@ -14,32 +14,36 @@ export class TestService {
     this.supabase = this.supabaseService.supabase;
   }
 async createUser(user: { email: string, password: string, full_name: string, role: string }) {
-  // 1. Create auth user
-  const { data: authData, error: authError } = await this.supabase.auth.admin.createUser({
-    email: user.email,
-    password: user.password,
-    email_confirm: true,
-  });
+  try {
+    // 1. Create auth user using signUp (which doesn't require admin)
+    const { data: authData, error: authError } = await this.supabase.auth.signUp({
+      email: user.email,
+      password: user.password,
+    });
 
-  if (authError || !authData.user) {
-    console.error('Failed to create auth user:', authError);
-    return { error: authError };
+    if (authError || !authData.user) {
+      console.error('Failed to create auth user:', authError);
+      return { error: authError };
+    }
+
+    // 2. Insert into profiles table
+    const { error: profileError } = await this.supabase.from('profiles').insert({
+      id: authData.user.id,
+      email: user.email,
+      full_name: user.full_name,
+      role: user.role,
+    });
+
+    if (profileError) {
+      console.error('Failed to insert into profiles:', profileError);
+      return { error: profileError };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('Error creating user:', err);
+    return { error: err };
   }
-
-  // 2. Insert into profiles table
-  const { error: profileError } = await this.supabase.from('profiles').insert({
-    id: authData.user.id,
-    email: user.email,
-    full_name: user.full_name,
-    role: user.role,
-  });
-
-  if (profileError) {
-    console.error('Failed to insert into profiles:', profileError);
-    return { error: profileError };
-  }
-
-  return { success: true };
 }
 
    async getProfiles() {
