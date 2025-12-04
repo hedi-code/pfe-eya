@@ -67,7 +67,7 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Lancer cas de test</h1>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Jenkins CI/CD</h1>
         <p class="text-gray-600" *ngIf="jobInfo">{{ jobInfo.description || 'Test automation jobs' }}</p>
       </div>
       <div class="flex space-x-3">
@@ -88,6 +88,35 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
           </svg>
         </button>
+      </div>
+    </div>
+
+    <!-- Project Selector -->
+    <div class="card-modern p-6 mb-6">
+      <div class="flex items-center justify-between">
+        <div class="flex-1 mr-4">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Projet sélectionné</label>
+          <div class="flex items-center space-x-3">
+            <select
+              [value]="selectedProject?.id || ''"
+              (change)="onProjectChange($event)"
+              class="input-modern flex-1"
+            >
+              <option *ngFor="let project of projects" [value]="project.id">
+                {{ project.name }} ({{ project.jobName }})
+              </option>
+            </select>
+            <button (click)="openProjectDialog()" class="btn-modern btn-primary flex-shrink-0">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Ajouter un projet
+            </button>
+          </div>
+          <p class="text-xs text-gray-500 mt-2" *ngIf="selectedProject?.description">
+            {{ selectedProject?.description }}
+          </p>
+        </div>
       </div>
     </div>
 
@@ -274,6 +303,64 @@
           Lancer
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Project Dialog -->
+  <div *ngIf="showProjectDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Ajouter un projet Jenkins</h2>
+      <p class="text-gray-600 mb-6">Configurez un nouveau projet Jenkins</p>
+
+      <form (ngSubmit)="addProject()" class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Nom du projet *</label>
+          <input
+            type="text"
+            [(ngModel)]="newProject.name"
+            name="projectName"
+            placeholder="Ex: Brain Tests"
+            class="input-modern w-full"
+            required
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Nom du job Jenkins *</label>
+          <input
+            type="text"
+            [(ngModel)]="newProject.jobName"
+            name="jobName"
+            placeholder="Ex: brain-tests"
+            class="input-modern w-full"
+            required
+          />
+          <p class="text-xs text-gray-500 mt-1">Le nom exact du job tel qu'il apparaît dans Jenkins</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Description (optionnel)</label>
+          <textarea
+            [(ngModel)]="newProject.description"
+            name="description"
+            placeholder="Description du projet..."
+            class="input-modern w-full"
+            rows="3"
+          ></textarea>
+        </div>
+
+        <div class="flex space-x-3 pt-4">
+          <button type="button" (click)="closeProjectDialog()" class="btn-modern btn-secondary flex-1">
+            Annuler
+          </button>
+          <button type="submit" class="btn-modern btn-primary flex-1">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Ajouter
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 

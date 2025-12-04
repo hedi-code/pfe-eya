@@ -9,6 +9,13 @@ export interface JenkinsCredentials {
   baseUrl: string;
 }
 
+export interface JenkinsProject {
+  id: string;
+  name: string;
+  jobName: string;
+  description?: string;
+}
+
 export interface JenkinsBuild {
   number: number;
   url: string;
@@ -57,6 +64,12 @@ export class JenkinsService {
   private credentialsSubject = new BehaviorSubject<JenkinsCredentials | null>(null);
   public credentials$ = this.credentialsSubject.asObservable();
 
+  private projectsSubject = new BehaviorSubject<JenkinsProject[]>([]);
+  public projects$ = this.projectsSubject.asObservable();
+
+  private selectedProjectSubject = new BehaviorSubject<JenkinsProject | null>(null);
+  public selectedProject$ = this.selectedProjectSubject.asObservable();
+
   constructor(private http: HttpClient) {
     // Load credentials from localStorage if available
     const savedCredentials = localStorage.getItem('jenkinsCredentials');
@@ -67,9 +80,34 @@ export class JenkinsService {
       const defaultCredentials: JenkinsCredentials = {
         username: 'admin',
         token: 'eyaelouni',
-        baseUrl: 'http://localhost:8080/job/brain-tests'
+        baseUrl: 'http://localhost:8080'
       };
       this.setCredentials(defaultCredentials);
+    }
+
+    // Load projects from localStorage
+    const savedProjects = localStorage.getItem('jenkinsProjects');
+    if (savedProjects) {
+      this.projectsSubject.next(JSON.parse(savedProjects));
+    } else {
+      // Set default projects
+      const defaultProjects: JenkinsProject[] = [
+        {
+          id: 'brain-tests',
+          name: 'Brain Tests',
+          jobName: 'brain-tests',
+          description: 'Tests principaux du projet Brain'
+        }
+      ];
+      this.setProjects(defaultProjects);
+    }
+
+    // Load selected project
+    const savedSelectedProject = localStorage.getItem('jenkinsSelectedProject');
+    if (savedSelectedProject) {
+      this.selectedProjectSubject.next(JSON.parse(savedSelectedProject));
+    } else if (this.projectsSubject.value.length > 0) {
+      this.selectProject(this.projectsSubject.value[0]);
     }
   }
 
@@ -87,6 +125,39 @@ export class JenkinsService {
     return this.credentialsSubject.value;
   }
 
+  setProjects(projects: JenkinsProject[]): void {
+    localStorage.setItem('jenkinsProjects', JSON.stringify(projects));
+    this.projectsSubject.next(projects);
+  }
+
+  getProjects(): JenkinsProject[] {
+    return this.projectsSubject.value;
+  }
+
+  addProject(project: JenkinsProject): void {
+    const projects = [...this.projectsSubject.value, project];
+    this.setProjects(projects);
+  }
+
+  removeProject(projectId: string): void {
+    const projects = this.projectsSubject.value.filter(p => p.id !== projectId);
+    this.setProjects(projects);
+
+    // If the removed project was selected, select the first one
+    if (this.selectedProjectSubject.value?.id === projectId && projects.length > 0) {
+      this.selectProject(projects[0]);
+    }
+  }
+
+  selectProject(project: JenkinsProject): void {
+    localStorage.setItem('jenkinsSelectedProject', JSON.stringify(project));
+    this.selectedProjectSubject.next(project);
+  }
+
+  getSelectedProject(): JenkinsProject | null {
+    return this.selectedProjectSubject.value;
+  }
+
   private getAuthHeaders(): HttpHeaders {
     const credentials = this.getCredentials();
     if (!credentials) {
@@ -102,7 +173,11 @@ export class JenkinsService {
 
   private getBaseUrl(): string {
     // Use proxy path to avoid CORS issues
-    return '/jenkins/job/brain-tests';
+    const selectedProject = this.getSelectedProject();
+    if (!selectedProject) {
+      return '/jenkins/job/brain-tests'; // fallback
+    }
+    return `/jenkins/job/${selectedProject.jobName}`;
   }
 
   getJobInfo(): Observable<JenkinsJob> {

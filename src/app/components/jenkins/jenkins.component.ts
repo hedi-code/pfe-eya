@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { JenkinsService, JenkinsJob, JenkinsBuild, JenkinsCredentials } from '../../services/jenkins.service';
+import { JenkinsService, JenkinsJob, JenkinsBuild, JenkinsCredentials, JenkinsProject } from '../../services/jenkins.service';
 
 @Component({
   selector: 'app-jenkins',
@@ -20,6 +20,7 @@ export class JenkinsComponent implements OnInit {
   error: string | null = null;
   showCredentialsForm = false;
   showBuildDialog = false;
+  showProjectDialog = false;
   showToast = false;
   toastMessage = '';
   toastType: 'success' | 'error' = 'success';
@@ -27,7 +28,17 @@ export class JenkinsComponent implements OnInit {
   credentials: JenkinsCredentials = {
     username: '',
     token: '',
-    baseUrl: 'http://localhost:8080/job/brain-tests'
+    baseUrl: 'http://localhost:8080'
+  };
+
+  projects: JenkinsProject[] = [];
+  selectedProject: JenkinsProject | null = null;
+
+  newProject: JenkinsProject = {
+    id: '',
+    name: '',
+    jobName: '',
+    description: ''
   };
 
   buildParameters: { [key: string]: string } = {};
@@ -42,6 +53,17 @@ export class JenkinsComponent implements OnInit {
         this.loadJobInfo();
       } else {
         this.showCredentialsForm = true;
+      }
+    });
+
+    this.jenkinsService.projects$.subscribe(projects => {
+      this.projects = projects;
+    });
+
+    this.jenkinsService.selectedProject$.subscribe(project => {
+      this.selectedProject = project;
+      if (project) {
+        this.loadJobInfo();
       }
     });
   }
@@ -249,6 +271,69 @@ export class JenkinsComponent implements OnInit {
 
   refresh(): void {
     this.loadJobInfo();
+  }
+
+  onProjectChange(event: Event): void {
+    const selectElement = event.target as HTMLSelectElement;
+    const projectId = selectElement.value;
+    const project = this.projects.find(p => p.id === projectId);
+
+    if (project) {
+      this.jenkinsService.selectProject(project);
+      this.builds = [];
+      this.selectedBuild = null;
+      this.consoleOutput = '';
+      this.testResults = null;
+    }
+  }
+
+  openProjectDialog(): void {
+    this.showProjectDialog = true;
+    this.newProject = {
+      id: '',
+      name: '',
+      jobName: '',
+      description: ''
+    };
+  }
+
+  closeProjectDialog(): void {
+    this.showProjectDialog = false;
+  }
+
+  addProject(): void {
+    if (!this.newProject.name || !this.newProject.jobName) {
+      this.showToastMessage('Veuillez remplir tous les champs obligatoires', 'error');
+      return;
+    }
+
+    // Generate ID from job name
+    this.newProject.id = this.newProject.jobName.toLowerCase().replace(/\s+/g, '-');
+
+    // Check if project already exists
+    if (this.projects.some(p => p.id === this.newProject.id)) {
+      this.showToastMessage('Un projet avec ce nom existe déjà', 'error');
+      return;
+    }
+
+    this.jenkinsService.addProject({ ...this.newProject });
+    this.showToastMessage('Projet ajouté avec succès', 'success');
+    this.closeProjectDialog();
+
+    // Select the newly added project
+    this.jenkinsService.selectProject(this.newProject);
+  }
+
+  removeProject(projectId: string): void {
+    if (this.projects.length <= 1) {
+      this.showToastMessage('Impossible de supprimer le dernier projet', 'error');
+      return;
+    }
+
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) {
+      this.jenkinsService.removeProject(projectId);
+      this.showToastMessage('Projet supprimé avec succès', 'success');
+    }
   }
 
   private getErrorMessage(err: any): string {
