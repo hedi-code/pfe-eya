@@ -232,7 +232,10 @@ export class JenkinsComponent implements OnInit {
     if (building) return 'bg-blue-500';
     if (!result) return 'bg-gray-400';
 
-    switch (result) {
+    // Override result based on test results if available
+    const effectiveResult = this.getEffectiveBuildResult(result);
+
+    switch (effectiveResult) {
       case 'SUCCESS':
         return 'bg-green-500';
       case 'FAILURE':
@@ -248,7 +251,30 @@ export class JenkinsComponent implements OnInit {
 
   getBuildStatusText(result: string | null, building: boolean): string {
     if (building) return 'Building...';
-    return result || 'Unknown';
+
+    // Override result based on test results if available
+    const effectiveResult = this.getEffectiveBuildResult(result);
+    return effectiveResult || 'Unknown';
+  }
+
+  /**
+   * Determine the effective build result based on test results
+   * If tests passed and no tests failed, mark as SUCCESS
+   */
+  private getEffectiveBuildResult(originalResult: string | null): string | null {
+    // If we have test results for the selected build
+    if (this.testResults && this.selectedBuild) {
+      const hasPassedTests = this.testResults.passCount > 0;
+      const hasNoFailedTests = this.testResults.failCount === 0;
+
+      // If tests passed and no tests failed, override to SUCCESS
+      if (hasPassedTests && hasNoFailedTests) {
+        return 'SUCCESS';
+      }
+    }
+
+    // Otherwise, return the original result from Jenkins
+    return originalResult;
   }
 
   formatDuration(milliseconds: number): string {

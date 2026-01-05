@@ -1,35 +1,56 @@
 <div class="p-6 bg-gray-100 min-h-screen">
   <h1 class="text-3xl font-bold text-gray-800 mb-6">Analyse des Tests</h1>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-    <!-- Pie Chart -->
-    <div class="bg-white shadow rounded-lg p-4">
-      <h2 class="text-lg font-semibold text-gray-700 mb-2">Répartition des Tests</h2>
-      <canvas baseChart 
-        [data]="pieChartData"
-        [labels]="pieChartLabels"
-        [type]="'pie'">
-      </canvas>
-    </div>
-
-    <!-- Bar Chart -->
-    <div class="bg-white shadow rounded-lg p-4">
-      <h2 class="text-lg font-semibold text-gray-700 mb-2">Tests par Jour</h2>
-      <canvas baseChart 
-        [datasets]="barChartData"
-        [labels]="barChartLabels"
-        [type]="'bar'">
-      </canvas>
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex items-center justify-center py-12">
+    <div class="text-center">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+      <p class="text-gray-500 font-medium">Chargement des statistiques...</p>
     </div>
   </div>
 
-  <!-- Line Chart Full Width -->
-  <div class="bg-white shadow rounded-lg p-4">
-    <h2 class="text-lg font-semibold text-gray-700 mb-2">Tendance des Tests</h2>
-    <canvas baseChart 
-      [datasets]="lineChartData"
-      [labels]="lineChartLabels"
-      [type]="'line'">
-    </canvas>
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg mb-6">
+    <div class="flex items-center">
+      <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <p class="font-semibold">{{ error }}</p>
+    </div>
+  </div>
+
+  <!-- Charts Content -->
+  <div *ngIf="!loading && !error">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <!-- Pie Chart -->
+      <div class="bg-white shadow rounded-lg p-4">
+        <h2 class="text-lg font-semibold text-gray-700 mb-2">Répartition des Tests</h2>
+        <canvas baseChart
+          [data]="pieChartData"
+          [labels]="pieChartLabels"
+          [type]="'pie'">
+        </canvas>
+      </div>
+
+      <!-- Bar Chart -->
+      <div class="bg-white shadow rounded-lg p-4">
+        <h2 class="text-lg font-semibold text-gray-700 mb-2">Tests par Jour (7 derniers jours)</h2>
+        <canvas baseChart
+          [datasets]="barChartData"
+          [labels]="barChartLabels"
+          [type]="'bar'">
+        </canvas>
+      </div>
+    </div>
+
+    <!-- Line Chart Full Width -->
+    <div class="bg-white shadow rounded-lg p-4">
+      <h2 class="text-lg font-semibold text-gray-700 mb-2">Tendance des Tests (7 derniers jours)</h2>
+      <canvas baseChart
+        [datasets]="lineChartData"
+        [labels]="lineChartLabels"
+        [type]="'line'">
+      </canvas>
+    </div>
   </div>
 </div>
